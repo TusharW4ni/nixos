@@ -25,7 +25,7 @@
     vim
     wget
     curl
-    htop
+    btop
     tree
     google-chrome
     claude-code
