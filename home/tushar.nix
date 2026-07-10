@@ -29,17 +29,16 @@ in
   home.packages = with pkgs; [
     kdePackages.kate
     nixos-switch
+    gh
   ];
 
   programs.home-manager.enable = true;
 
   programs.git = {
     enable = true;
-    userName = "TusharW4ni";
-    userEmail = "reachtusharwani@gmail.com";
+    settings.user.name = "TusharW4ni";
+    settings.user.email = "reachtusharwani@gmail.com";
   };
-
-  programs.gh.enable = true;
 
   programs.bash.enable = true;
   programs.bash.shellAliases = {
