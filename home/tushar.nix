@@ -16,7 +16,7 @@ let
     if ! git diff --staged --quiet; then
       GENERATION=$(sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -1 | awk '{print $1}')
       git commit -m "switch: generation $GENERATION ($(date '+%Y-%m-%d %H:%M'))"
-      git push origin master
+      git push origin main
     else
       echo "nixos-switch: nothing new to commit"
     fi
