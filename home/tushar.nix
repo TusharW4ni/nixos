@@ -29,7 +29,7 @@ in
   home.packages = with pkgs; [
     kdePackages.kate
     nixos-switch
-    gh
+    remmina
   ];
 
   programs.home-manager.enable = true;
@@ -38,6 +38,12 @@ in
     enable = true;
     settings.user.name = "TusharW4ni";
     settings.user.email = "reachtusharwani@gmail.com";
+  };
+
+  programs.gh = {
+    enable = true;
+    settings.git_protocol = "https";
+    gitCredentialHelper.enable = true;
   };
 
   programs.bash.enable = true;
