@@ -4,6 +4,7 @@
     ../../modules/system/boot.nix
     ../../modules/system/networking.nix
     ../../modules/system/locale.nix
+    ../../modules/system/keyd.nix
     ../../modules/system/audio.nix
     ../../modules/system/printing.nix
     ../../modules/desktop/plasma.nix
