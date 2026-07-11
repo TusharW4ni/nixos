@@ -34,6 +34,7 @@ in
     discord
     slack
     heroic
+    winetricks
   ];
 
   programs.home-manager.enable = true;
