@@ -31,6 +31,9 @@ in
     kdePackages.kate
     nixos-switch
     remmina
+    discord
+    slack
+    heroic
   ];
 
   programs.home-manager.enable = true;
