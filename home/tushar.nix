@@ -40,6 +40,13 @@ in
 
   programs.home-manager.enable = true;
 
+  xdg.desktopEntries.ghostty = {
+    name = "Ghostty";
+    exec = "ghostty";
+    terminal = false;
+    categories = [ "System" "TerminalEmulator" ];
+  };
+
   programs.git = {
     enable = true;
     settings.user.name = "TusharW4ni";
