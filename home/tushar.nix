@@ -33,6 +33,7 @@ in
     remmina
     discord
     slack
+    ghostty
     heroic
     winetricks
   ];
