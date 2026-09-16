@@ -79,4 +79,11 @@ in
   programs.bash.shellAliases = {
     ns = "nixos-switch";
   };
+
+  # Auto-enter a project's dev shell on cd (reads .envrc → `use flake`).
+  # nix-direnv caches the shell so re-entry is instant.
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
 }
