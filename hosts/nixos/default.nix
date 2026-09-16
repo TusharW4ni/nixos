@@ -8,6 +8,7 @@
     ../../modules/system/audio.nix
     ../../modules/system/printing.nix
     ../../modules/system/secrets.nix
+    ../../modules/system/docker.nix
     ../../modules/desktop/plasma.nix
   ];
 
@@ -16,7 +17,7 @@
   users.users.tushar = {
     isNormalUser = true;
     description = "tushar";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
 
     # Decrypted from secrets/tushar-pw.age into /run/agenix/tushar-pw at
     # activation. Contains the output of `mkpasswd -m sha-512`.
