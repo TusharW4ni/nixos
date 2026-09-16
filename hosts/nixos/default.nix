@@ -32,6 +32,12 @@
     tailscale
   ];
 
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
+  };
+
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   system.stateVersion = "26.05";

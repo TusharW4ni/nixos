@@ -56,6 +56,8 @@ in
     gitCredentialHelper.enable = true;
   };
 
+  nix.gc.automatic = true;
+
   programs.bash.enable = true;
   programs.bash.shellAliases = {
     ns = "nixos-switch";
