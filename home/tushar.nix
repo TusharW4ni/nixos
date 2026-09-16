@@ -56,7 +56,11 @@ in
     gitCredentialHelper.enable = true;
   };
 
-  nix.gc.automatic = true;
+  nix.gc = {
+    automatic = true;
+    frequency = "weekly";
+    options = "--delete-older-than 14d";
+  };
 
   programs.bash.enable = true;
   programs.bash.shellAliases = {
