@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/boot.nix
@@ -7,6 +7,7 @@
     ../../modules/system/keyd.nix
     ../../modules/system/audio.nix
     ../../modules/system/printing.nix
+    ../../modules/system/secrets.nix
     ../../modules/desktop/plasma.nix
   ];
 
@@ -16,7 +17,15 @@
     isNormalUser = true;
     description = "tushar";
     extraGroups = [ "networkmanager" "wheel" ];
+
+    # Decrypted from secrets/tushar-pw.age into /run/agenix/tushar-pw at
+    # activation. Contains the output of `mkpasswd -m sha-512`.
+    hashedPasswordFile = config.age.secrets.tushar-pw.path;
   };
+
+  # Prevent silently-lockable accounts: fail the build if a normal user
+  # has no declarative password set.
+  users.mutableUsers = false;
 
   nixpkgs.config.allowUnfree = true;
 

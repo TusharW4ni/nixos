@@ -5,17 +5,22 @@ let
     CONFIG_DIR="$HOME/nixos-config"
 
     cd "$CONFIG_DIR"
-    git add -A
+
+    # Commit BEFORE the sudo rebuild so Nix hashes a CLEAN tree. Rebuilding
+    # against a dirty tree makes Nix (running as root) write root-owned
+    # objects into .git/objects, which then break later user-level git/nix
+    # operations. Commit provisionally, then amend with the generation number.
+    if [ -n "$(git status --porcelain)" ]; then
+      git add -A
+      git commit -m "switch: pending ($(date '+%Y-%m-%d %H:%M'))"
+      COMMITTED=1
+    fi
 
     sudo nixos-rebuild switch --flake "$CONFIG_DIR#nixos" "$@"
 
-    if ! git diff --cached --quiet || ! git diff --quiet; then
-      git add -A
-    fi
-
-    if ! git diff --staged --quiet; then
+    if [ -n "$COMMITTED" ]; then
       GENERATION=$(sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -1 | awk '{print $1}')
-      git commit -m "switch: generation $GENERATION ($(date '+%Y-%m-%d %H:%M'))"
+      git commit --amend -m "switch: generation $GENERATION ($(date '+%Y-%m-%d %H:%M'))"
       git push origin main
     else
       echo "nixos-switch: nothing new to commit"
@@ -23,6 +28,11 @@ let
   '';
 in
 {
+  imports = [
+    inputs.plasma-manager.homeManagerModules.plasma-manager
+    ./plasma.nix
+  ];
+
   home.username = "tushar";
   home.homeDirectory = "/home/tushar";
   home.stateVersion = "26.05";
