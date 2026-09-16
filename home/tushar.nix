@@ -33,7 +33,7 @@ in
     discord
     slack
     ghostty
-    inputs.herdr.packages.${pkgs.system}.default
+    inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   xdg.configFile."herdr/config.toml".source = ./herdr.toml;
