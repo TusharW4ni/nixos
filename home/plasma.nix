@@ -300,11 +300,6 @@
       kdeglobals.WM.inactiveForeground = "161,169,177";
       krunnerrc.General.FreeFloating = true;
       krunnerrc.General.historyBehavior = "ImmediateCompletion";
-      kuriikwsfilterrc.General.DefaultWebShortcut = "google";
-      kuriikwsfilterrc.General.EnableWebShortcuts = true;
-      kuriikwsfilterrc.General.KeywordDelimiter = ":";
-      kuriikwsfilterrc.General.PreferredWebShortcuts = "youtube,yahoo,google,wikit,wikipedia";
-      kuriikwsfilterrc.General.UsePreferredWebShortcutsOnly = false;
       kwalletrc.Wallet."First Use" = false;
       kwinrc.Desktops.Id_1 = "b1ed41c1-c3ea-4e2c-884f-fed9d4171a8b";
       kwinrc.Desktops.Number = 1;
