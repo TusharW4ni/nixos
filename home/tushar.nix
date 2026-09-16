@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 let
   nixos-switch = pkgs.writeShellScriptBin "nixos-switch" ''
     set -e
@@ -33,7 +33,10 @@ in
     discord
     slack
     ghostty
+    inputs.herdr.packages.${pkgs.system}.default
   ];
+
+  xdg.configFile."herdr/config.toml".source = ./herdr.toml;
 
   programs.home-manager.enable = true;
 

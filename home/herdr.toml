@@ -1,0 +1,18 @@
+onboarding = false
+
+[keys]
+# Split the current pane to the right with prefix + |
+split_vertical = "prefix+|"
+# Split the current pane downward with prefix + -
+split_horizontal = "prefix+minus"
+
+[ui]
+status_indicators = "symbols"
+copy_on_select = "clipboard"
+
+[ui.toast]
+delivery = "system"
+
+[theme]
+name = "catppuccin"
+auto_switch = false
