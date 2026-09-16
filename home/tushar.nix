@@ -30,12 +30,9 @@ in
   home.packages = with pkgs; [
     kdePackages.kate
     nixos-switch
-    remmina
     discord
     slack
     ghostty
-    heroic
-    winetricks
   ];
 
   programs.home-manager.enable = true;
