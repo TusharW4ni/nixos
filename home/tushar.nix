@@ -48,6 +48,17 @@ in
     kdePackages.kate
     nixos-switch
     neovim
+    # Build toolchain for Neovim plugins that compile native code
+    # (e.g. telescope-fzf-native builds libfzf via `make`).
+    gnumake
+    gcc
+    jq
+    # Neovim runtime deps: telescope (ripgrep/fd), copilot.vim + Mason
+    # npm servers (nodejs), Mason archive extraction (unzip).
+    ripgrep
+    fd
+    nodejs
+    unzip
     discord
     slack
     ghostty
