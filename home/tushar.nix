@@ -37,7 +37,10 @@ in
 {
   imports = [
     inputs.plasma-manager.homeModules.plasma-manager
+    inputs.nixvim.homeModules.nixvim
     ./plasma.nix
+    # nixvim config sourced from the nvim repo's nixvim branch (see flake input)
+    "${inputs.nvim-config}/nvim.nix"
   ];
 
   home.username = "tushar";
@@ -47,18 +50,14 @@ in
   home.packages = with pkgs; [
     kdePackages.kate
     nixos-switch
-    neovim
-    # Build toolchain for Neovim plugins that compile native code
-    # (e.g. telescope-fzf-native builds libfzf via `make`).
-    gnumake
-    gcc
+    # Neovim itself is provided by nixvim (see ./nvim.nix). ripgrep/fd stay
+    # here for interactive shell use (nixvim also puts them on nvim's PATH).
     jq
-    # Neovim runtime deps: telescope (ripgrep/fd), copilot.vim + Mason
-    # npm servers (nodejs), Mason archive extraction (unzip).
     ripgrep
     fd
-    nodejs
-    unzip
+    # Wayland clipboard provider. Required for nvim's clipboard=unnamedplus
+    # (the `+` register) — without it c/cw/y/d error on every op.
+    wl-clipboard
     # python3: required by Claude Code plugin hooks (e.g. yap-with-claude)
     # that shell out to `python3`; macOS ships it, NixOS does not.
     python3
@@ -72,12 +71,6 @@ in
   ];
 
   xdg.configFile."herdr/config.toml".source = ./herdr.toml;
-
-  # Neovim config: out-of-store symlink to a live clone of
-  # github:TusharW4ni/nvim at ~/nvim. Writable, so lazy.nvim can manage its
-  # lazy-lock.json; edit in place and manage with plain git.
-  xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nvim";
 
   programs.home-manager.enable = true;
 
@@ -107,21 +100,18 @@ in
   };
 
   programs.bash.enable = true;
-  programs.bash.shellAliases = {
-    ns = "nixos-switch";
-  };
-
-  # Claude Code shortcuts, defined only when the `claude` binary is on PATH so
-  # they vanish cleanly if it's ever not installed. Both launch with auto
-  # permission mode on by default:
+  # claude-code is a system package (hosts/nixos/default.nix:41), so `claude`
+  # is always on PATH — no `command -v` guard needed. These land via
+  # shellAliases, which home-manager writes AFTER bash's interactive guard;
+  # bashrcExtra ran at the very top of .bashrc, before PATH was ready, so the
+  # guard could fail and the aliases silently vanish.
   #   c  -> claude (auto mode)
   #   cw -> claude in a fresh git worktree (auto mode; accepts an optional name)
-  programs.bash.bashrcExtra = ''
-    if command -v claude >/dev/null 2>&1; then
-      alias c='claude --permission-mode auto'
-      alias cw='claude --permission-mode auto --worktree'
-    fi
-  '';
+  programs.bash.shellAliases = {
+    ns = "nixos-switch";
+    c = "claude --permission-mode auto";
+    cw = "claude --permission-mode auto --worktree";
+  };
 
   # claude-sync integration: keep sessions synced with the R2 remote.
   # The config.yaml + age-key.txt are delivered by agenix (see

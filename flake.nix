@@ -16,6 +16,17 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Neovim config lives in the nvim repo's nixvim branch (main stays the
+    # lazy.nvim/Mason config). flake=false: it's just a module file we import.
+    # `nix flake update nvim-config` pulls the latest branch commit.
+    nvim-config = {
+      url = "github:TusharW4ni/nvim/nixvim";
+      flake = false;
+    };
     herdr.url = "github:herdrdev/herdr/v0.9.0";
   };
 
