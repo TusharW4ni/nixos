@@ -59,6 +59,9 @@ in
     fd
     nodejs
     unzip
+    # python3: required by Claude Code plugin hooks (e.g. yap-with-claude)
+    # that shell out to `python3`; macOS ships it, NixOS does not.
+    python3
     discord
     slack
     ghostty
@@ -109,13 +112,14 @@ in
   };
 
   # Claude Code shortcuts, defined only when the `claude` binary is on PATH so
-  # they vanish cleanly if it's ever not installed:
-  #   c  -> claude
-  #   cw -> claude in a fresh git worktree (accepts an optional worktree name)
+  # they vanish cleanly if it's ever not installed. Both launch with auto
+  # permission mode on by default:
+  #   c  -> claude (auto mode)
+  #   cw -> claude in a fresh git worktree (auto mode; accepts an optional name)
   programs.bash.bashrcExtra = ''
     if command -v claude >/dev/null 2>&1; then
-      alias c='claude'
-      alias cw='claude --worktree'
+      alias c='claude --permission-mode auto'
+      alias cw='claude --permission-mode auto --worktree'
     fi
   '';
 
