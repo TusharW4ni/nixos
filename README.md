@@ -25,6 +25,7 @@ A modular, reproducible NixOS system configuration using **Nix Flakes** and **Ho
   - [Configuring a Program with Home Manager](#configuring-a-program-with-home-manager)
   - [Adding a Second Machine](#adding-a-second-machine)
   - [Adding Secrets Management](#adding-secrets-management)
+- [Neovim Config](#neovim-config)
 - [Upgrading NixOS](#upgrading-nixos)
 - [Rollbacks](#rollbacks)
 - [Useful Nix Commands](#useful-nix-commands)
@@ -394,6 +395,11 @@ sudo nixos-rebuild switch --flake ~/nixos-config#laptop
 
 Modules in `modules/` are shared across all hosts. Each host imports only what it needs.
 
+> **Note:** The Neovim config is **not** vendored by the flake — it lives in a
+> separate repo cloned to `~/nvim`. On a fresh machine, clone it *before* the
+> first `nixos-switch`, or activation will fail because the symlink target is
+> missing. See [Neovim Config](#neovim-config).
+
 ### Adding Secrets Management
 
 **sops-nix** is the most common secrets manager for NixOS flakes. It encrypts secrets with your SSH or age key and decrypts them at activation time.
@@ -415,6 +421,78 @@ sops.secrets.wifi_password = {};
 ```
 
 Secrets are created with `sops secrets/secrets.yaml` and are only readable by the declared owner at runtime.
+
+---
+
+## Neovim Config
+
+The Neovim configuration is **not** stored in this repo. It lives in a separate
+repo, [`TusharW4ni/nvim`](https://github.com/TusharW4ni/nvim), and is wired in
+as an **out-of-store symlink**: `home/tushar.nix` points `~/.config/nvim` at a
+live clone in `~/nvim` via `config.lib.file.mkOutOfStoreSymlink`.
+
+```nix
+# home/tushar.nix
+xdg.configFile."nvim".source =
+  config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nvim";
+```
+
+**Why out-of-store instead of a pinned flake input?** Neovim's plugin manager
+(lazy.nvim) writes `lazy-lock.json` back into its own config directory on every
+install/sync. If the config were a Nix store path it would be **read-only**, and
+every plugin operation would fail. An out-of-store symlink keeps `~/.config/nvim`
+writable, so lazy.nvim works and the config is editable live.
+
+### Fresh-machine setup
+
+The symlink target must exist *before* the first switch, so clone the nvim repo
+first:
+
+```bash
+gh repo clone TusharW4ni/nvim ~/nvim
+# then the usual:
+sudo nixos-rebuild switch --flake ~/nixos-config#nixos   # (or `ns`)
+```
+
+If `~/nvim` is missing when you switch, activation fails (dangling symlink target).
+
+### Editing the config
+
+`~/.config/nvim` **is** `~/nvim` — edit either path, changes are live (no
+rebuild needed). Manage it as an ordinary git repo:
+
+```bash
+cd ~/nvim
+# ...edit lua files, add plugins under lua/plugins/...
+git add -A && git commit -m "..." && git push
+```
+
+Commit `lazy-lock.json` when plugin versions change — that file pins plugin
+commits (restore with `:Lazy restore`).
+
+### External tool dependencies
+
+Plugins shell out to CLI tools that must be provided by Nix (in
+`home.packages`), since lazy.nvim/Mason don't install system-level binaries:
+
+| Tool | Needed by |
+|------|-----------|
+| `gnumake`, `gcc` | `telescope-fzf-native` build; treesitter parser compilation |
+| `ripgrep`, `fd` | telescope `live_grep` / `find_files` |
+| `nodejs` | `copilot.vim`; Mason npm servers (`ts_ls`, `vue_ls`, `prettierd`) |
+| `unzip`, `jq` | Mason package extraction / metadata |
+
+If you add a plugin that needs a new binary, add it to `home.packages` and run
+`ns`. The lua config itself never needs a rebuild.
+
+### Reproducibility note
+
+Because the config lives in git (not the flake), reproducing it is a **git**
+operation, not a pure Nix one: `nixos-rebuild` alone won't reconstruct it — you
+need the `~/nvim` clone plus its committed `lazy-lock.json`. Plugins and LSP
+servers are fetched at runtime by lazy.nvim/Mason in either case. For fully
+hermetic, Nix-managed Neovim you would switch to `programs.neovim` with
+`pkgs.vimPlugins` (or nixvim) and drop lazy.nvim/Mason.
 
 ---
 
