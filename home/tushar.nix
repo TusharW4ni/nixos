@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, config, ... }:
 let
   nixos-switch = pkgs.writeShellScriptBin "nixos-switch" ''
     set -e
@@ -70,9 +70,11 @@ in
 
   xdg.configFile."herdr/config.toml".source = ./herdr.toml;
 
-  # Neovim config, pinned from github:TusharW4ni/nvim (flake = false input).
-  # Update with: nix flake update nvim-config && ns
-  xdg.configFile."nvim".source = inputs.nvim-config;
+  # Neovim config: out-of-store symlink to a live clone of
+  # github:TusharW4ni/nvim at ~/nvim. Writable, so lazy.nvim can manage its
+  # lazy-lock.json; edit in place and manage with plain git.
+  xdg.configFile."nvim".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nvim";
 
   programs.home-manager.enable = true;
 

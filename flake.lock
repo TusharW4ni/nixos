@@ -138,22 +138,6 @@
         "type": "github"
       }
     },
-    "nvim-config": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1790052702,
-        "narHash": "sha256-P+mkcUGs3x5kY0aehPqGk6YfoAz3jkkLWUu8fDk1HbY=",
-        "owner": "TusharW4ni",
-        "repo": "nvim",
-        "rev": "83315e7879017b4686a9ac334f514ef00a3dda8a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "TusharW4ni",
-        "repo": "nvim",
-        "type": "github"
-      }
-    },
     "plasma-manager": {
       "inputs": {
         "home-manager": [
@@ -183,7 +167,6 @@
         "herdr": "herdr",
         "home-manager": "home-manager_2",
         "nixpkgs": "nixpkgs_2",
-        "nvim-config": "nvim-config",
         "plasma-manager": "plasma-manager"
       }
     },
