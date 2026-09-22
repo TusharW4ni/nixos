@@ -64,6 +64,9 @@ in
     discord
     slack
     ghostty
+    # AWS CLI v2. `aws configure`/`aws sso login` write creds to ~/.aws, which
+    # is outside the Nix store and persists across rebuilds.
+    awscli2
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
     # Source-built from pkgs/claude-sync.nix (bump version there to update;
     # `claude-sync update` can't self-update the read-only Nix store).
