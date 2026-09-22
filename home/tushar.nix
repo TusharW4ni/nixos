@@ -44,6 +44,9 @@ in
     slack
     ghostty
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
+    # Source-built from pkgs/claude-sync.nix (bump version there to update;
+    # `claude-sync update` can't self-update the read-only Nix store).
+    (pkgs.callPackage ../pkgs/claude-sync.nix { })
   ];
 
   xdg.configFile."herdr/config.toml".source = ./herdr.toml;
@@ -79,6 +82,13 @@ in
   programs.bash.shellAliases = {
     ns = "nixos-switch";
   };
+
+  # claude-sync integration: keep sessions synced with the R2 remote.
+  # The config.yaml + age-key.txt are delivered by agenix (see
+  # modules/system/secrets.nix); this only decides WHEN to push/pull.
+  programs.bash.initExtra = ''
+    # TODO(human): decide the auto-sync trigger and fill this in.
+  '';
 
   # Auto-enter a project's dev shell on cd (reads .envrc → `use flake`).
   # nix-direnv caches the shell so re-entry is instant.

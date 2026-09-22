@@ -1,6 +1,8 @@
 { ... }: {
   services.keyd = {
-    enable = true;
+    # Disabled: reverted to normal PC key behavior (Win=Meta, Alt=Alt).
+    # Set back to true to restore the Mac-style Cmd remap below.
+    enable = false;
     keyboards.default = {
       ids = [ "*" ];
       settings = {

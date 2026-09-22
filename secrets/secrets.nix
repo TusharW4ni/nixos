@@ -3,4 +3,6 @@ let
 in
 {
   "tushar-pw.age".publicKeys = [ tushar ];
+  "claude-sync-config.age".publicKeys = [ tushar ];
+  "claude-sync-age-key.age".publicKeys = [ tushar ];
 }
