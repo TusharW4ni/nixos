@@ -6,6 +6,13 @@ let
 
     cd "$CONFIG_DIR"
 
+    # `nixos-switch --update` bumps all flake inputs before rebuilding. Any
+    # other flags are passed through to nixos-rebuild untouched.
+    if [ "$1" = "--update" ] || [ "$1" = "-u" ]; then
+      shift
+      nix flake update
+    fi
+
     # Commit BEFORE the sudo rebuild so Nix hashes a CLEAN tree. Rebuilding
     # against a dirty tree makes Nix (running as root) write root-owned
     # objects into .git/objects, which then break later user-level git/nix
@@ -40,6 +47,7 @@ in
   home.packages = with pkgs; [
     kdePackages.kate
     nixos-switch
+    neovim
     discord
     slack
     ghostty
@@ -50,6 +58,10 @@ in
   ];
 
   xdg.configFile."herdr/config.toml".source = ./herdr.toml;
+
+  # Neovim config, pinned from github:TusharW4ni/nvim (flake = false input).
+  # Update with: nix flake update nvim-config && ns
+  xdg.configFile."nvim".source = inputs.nvim-config;
 
   programs.home-manager.enable = true;
 
@@ -82,6 +94,17 @@ in
   programs.bash.shellAliases = {
     ns = "nixos-switch";
   };
+
+  # Claude Code shortcuts, defined only when the `claude` binary is on PATH so
+  # they vanish cleanly if it's ever not installed:
+  #   c  -> claude
+  #   cw -> claude in a fresh git worktree (accepts an optional worktree name)
+  programs.bash.bashrcExtra = ''
+    if command -v claude >/dev/null 2>&1; then
+      alias c='claude'
+      alias cw='claude --worktree'
+    fi
+  '';
 
   # claude-sync integration: keep sessions synced with the R2 remote.
   # The config.yaml + age-key.txt are delivered by agenix (see
