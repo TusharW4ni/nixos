@@ -7,6 +7,7 @@
     ../../modules/system/keyd.nix
     ../../modules/system/audio.nix
     ../../modules/system/printing.nix
+    ../../modules/system/bluetooth.nix
     ../../modules/system/secrets.nix
     ../../modules/system/docker.nix
     ../../modules/desktop/plasma.nix
