@@ -48,6 +48,7 @@ in
   home.stateVersion = "26.05";
 
   home.packages = with pkgs; [
+    kdePackages.kdenlive
     kdePackages.kate
     nixos-switch
     # Neovim itself is provided by nixvim (see ./nvim.nix). ripgrep/fd stay
