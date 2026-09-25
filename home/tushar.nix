@@ -88,6 +88,12 @@ in
     enable = true;
     settings.user.name = "TusharW4ni";
     settings.user.email = "reachtusharwani@gmail.com";
+    settings.user.signingkey = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+    settings.gpg.format = "ssh";
+    settings.gpg.ssh.allowedSignersFile =
+      "${config.home.homeDirectory}/.ssh/allowed_signers";
+    settings.commit.gpgsign = true;
+    settings.tag.gpgsign = true;
   };
 
   programs.gh = {
