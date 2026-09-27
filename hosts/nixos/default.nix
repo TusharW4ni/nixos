@@ -10,6 +10,7 @@
     ../../modules/system/bluetooth.nix
     ../../modules/system/secrets.nix
     ../../modules/system/docker.nix
+    ../../modules/system/syncthing.nix
     ../../modules/desktop/plasma.nix
   ];
 
