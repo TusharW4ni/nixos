@@ -66,6 +66,8 @@ in
     slack
     ghostty
     obsidian
+    freecad
+    blender
     # AWS CLI v2. `aws configure`/`aws sso login` write creds to ~/.aws, which
     # is outside the Nix store and persists across rebuilds.
     awscli2
