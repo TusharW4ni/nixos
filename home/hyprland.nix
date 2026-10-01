@@ -69,6 +69,13 @@
   # Hyprland window manager config.
   wayland.windowManager.hyprland = {
     enable = true;
+
+    # Write a classic hyprland.conf (hyprlang). home.stateVersion = "26.05"
+    # makes this module default to "lua", which renders our hyprlang-style
+    # `settings` into invalid Lua (hl.$mod / hl.exec-once) and Hyprland then
+    # rejects the config and falls back to defaults.
+    configType = "hyprlang";
+
     settings = {
       # Auto-detect every monitor at its preferred resolution.
       monitor = ",preferred,auto,1";
