@@ -48,6 +48,11 @@ in
   home.homeDirectory = "/home/tushar";
   home.stateVersion = "26.05";
 
+  # `bun add -g` drops binaries (e.g. hntui) into ~/.bun/bin. The tools
+  # themselves are imperative/mutable, but keeping this on PATH declaratively
+  # means they're runnable by name once installed.
+  home.sessionPath = [ "$HOME/.bun/bin" ];
+
   home.packages = with pkgs; [
     kdePackages.kdenlive
     kdePackages.kate
