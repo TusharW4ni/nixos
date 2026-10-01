@@ -140,12 +140,15 @@ in
   # The config.yaml + age-key.txt are delivered by agenix (see
   # modules/system/secrets.nix); this only decides WHEN to push/pull.
   programs.bash.initExtra = ''
-    # home-manager (as a NixOS module) writes session vars — including the
-    # ~/.bun/bin PATH entry from home.sessionPath — to hm-session-vars.sh and
-    # sources it from ~/.profile, i.e. only for LOGIN shells. Desktop terminals
-    # (ghostty) open non-login interactive shells that read ~/.bashrc instead,
-    # so re-source it here. The file self-guards against double-sourcing.
-    . "/etc/profiles/per-user/tushar/etc/profile.d/hm-session-vars.sh"
+    # Put bun's global-install bin dir (`bun add -g` → ~/.bun/bin) on PATH for
+    # interactive shells. home.sessionPath only covers LOGIN shells via
+    # hm-session-vars.sh — and that file self-guards with __HM_SESS_VARS_SOURCED,
+    # which existing desktop sessions already carry, so re-sourcing is a no-op.
+    # Set it directly here instead; the case guard keeps it idempotent.
+    case ":$PATH:" in
+      *":$HOME/.bun/bin:"*) ;;
+      *) export PATH="$HOME/.bun/bin:$PATH" ;;
+    esac
 
     # TODO(human): decide the auto-sync trigger and fill this in.
   '';
