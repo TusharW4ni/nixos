@@ -72,6 +72,10 @@ in
     # AWS CLI v2. `aws configure`/`aws sso login` write creds to ~/.aws, which
     # is outside the Nix store and persists across rebuilds.
     awscli2
+    # Bun runtime. Lets `bunx`/`bun add -g` run npm-published TUIs & tools
+    # through a nix-patched runtime, avoiding the `curl | sh` prebuilt-binary
+    # dynamic-linker breakage on NixOS.
+    bun
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
     # Source-built from pkgs/claude-sync.nix (bump version there to update;
     # `claude-sync update` can't self-update the read-only Nix store).
