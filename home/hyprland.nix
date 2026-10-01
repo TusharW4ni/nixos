@@ -94,7 +94,8 @@
       input = {
         kb_layout = "us";
         follow_mouse = 1;
-        touchpad.natural_scroll = true;
+        natural_scroll = false;          # mouse wheel
+        touchpad.natural_scroll = false; # touchpad
       };
 
       general = {
