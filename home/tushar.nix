@@ -51,7 +51,10 @@ in
   # `bun add -g` drops binaries (e.g. hntui) into ~/.bun/bin. The tools
   # themselves are imperative/mutable, but keeping this on PATH declaratively
   # means they're runnable by name once installed.
-  home.sessionPath = [ "$HOME/.bun/bin" ];
+  # ~/.local/bin: upstream `curl | bash` installers (e.g. terminal-browser)
+  # drop wrapper scripts here. Like ~/.bun/bin, the binaries are imperative;
+  # keeping the dir on PATH declaratively makes them runnable by name.
+  home.sessionPath = [ "$HOME/.bun/bin" "$HOME/.local/bin" ];
 
   home.packages = with pkgs; [
     kdePackages.kdenlive
@@ -148,6 +151,12 @@ in
     case ":$PATH:" in
       *":$HOME/.bun/bin:"*) ;;
       *) export PATH="$HOME/.bun/bin:$PATH" ;;
+    esac
+
+    # Same deal for ~/.local/bin, where `curl | bash` installers drop wrappers.
+    case ":$PATH:" in
+      *":$HOME/.local/bin:"*) ;;
+      *) export PATH="$HOME/.local/bin:$PATH" ;;
     esac
 
     # TODO(human): decide the auto-sync trigger and fill this in.
