@@ -10,6 +10,7 @@
     swaybg        # solid-color / image background
     brightnessctl # brightness keys
     pavucontrol   # audio GUI (handy while setting things up)
+    networkmanagerapplet # nm-applet tray icon + nm-connection-editor GUI
   ];
 
   # App launcher (bound to Super+Space below).
@@ -26,9 +27,14 @@
       position = "top";
       height = 30;
       modules-left = [ "hyprland/workspaces" ];
-      modules-center = [ "clock" ];
+      modules-center = [ "custom/clock" ];
       modules-right = [ "pulseaudio" "network" "battery" "tray" ];
-      clock.format = "{:%a %d %b  %H:%M}";
+      # Custom clock: MM (mon) - DD (ddd) | HH:MM:SS, lowercased.
+      # e.g. "10 (oct) - 01 (thu) | 07:11:10". Ticks every second.
+      "custom/clock" = {
+        exec = "date '+%m (%b) - %d (%a) | %H:%M:%S' | tr '[:upper:]' '[:lower:]'";
+        interval = 1;
+      };
       battery = {
         format = "BAT {capacity}%";
         format-charging = "CHG {capacity}%";
@@ -37,6 +43,7 @@
         format-wifi = "{essid} ({signalStrength}%)";
         format-ethernet = "eth";
         format-disconnected = "offline";
+        on-click = "nm-connection-editor"; # click the bar label to manage WiFi
       };
       pulseaudio = {
         format = "VOL {volume}%";
@@ -87,6 +94,7 @@
         "waybar"
         "mako"
         "swaybg -c 1e1e2e"
+        "nm-applet --indicator" # WiFi tray icon (left-click for network menu)
       ];
 
       env = [ "NIXOS_OZONE_WL,1" ];
