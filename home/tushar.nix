@@ -84,6 +84,10 @@ in
     # through a nix-patched runtime, avoiding the `curl | sh` prebuilt-binary
     # dynamic-linker breakage on NixOS.
     bun
+    # Node.js 24 "Krypton" (current LTS), nix-patched so its binary runs
+    # natively on NixOS. Provides `node`/`npm`/`npx` on PATH — needed by node
+    # CLI tools and by the caveman plugin's hooks (which call a bare `node`).
+    nodejs_24
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
     # Source-built from pkgs/claude-sync.nix (bump version there to update;
     # `claude-sync update` can't self-update the read-only Nix store).
