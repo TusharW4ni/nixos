@@ -12,6 +12,7 @@
     ../../modules/system/docker.nix
     ../../modules/system/syncthing.nix
     ../../modules/desktop/plasma.nix
+    ../../modules/desktop/hyprland.nix
   ];
 
   networking.hostName = "nixos";

@@ -39,6 +39,7 @@ in
     inputs.plasma-manager.homeModules.plasma-manager
     inputs.nixvim.homeModules.nixvim
     ./plasma.nix
+    ./hyprland.nix
     # nixvim config sourced from the nvim repo's nixvim branch (see flake input)
     "${inputs.nvim-config}/nvim.nix"
   ];
