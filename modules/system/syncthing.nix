@@ -2,6 +2,7 @@
   services.syncthing = {
     enable = true;
     user = "tushar";
+    dataDir = "/home/tushar/Sync";
     guiAddress = "0.0.0.0:8384";
     # Sync traffic (22000 tcp/udp + 21027 udp discovery) stays open to
     # LAN/internet — Syncthing authenticates peers with per-device certs
