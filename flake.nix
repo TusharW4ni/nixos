@@ -47,5 +47,22 @@
         }
       ];
     };
+
+    nixosConfigurations.latitude7490 = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
+      modules = [
+        ./hosts/latitude7490/default.nix
+        inputs.agenix.nixosModules.default
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = "hm-bak";
+          home-manager.extraSpecialArgs = { inherit inputs; };
+          home-manager.users.tushar = import ./home/tushar.nix;
+        }
+      ];
+    };
   };
 }
