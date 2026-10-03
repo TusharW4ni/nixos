@@ -23,7 +23,7 @@ let
       COMMITTED=1
     fi
 
-    sudo nixos-rebuild switch --flake "$CONFIG_DIR#nixos" "$@"
+    sudo nixos-rebuild switch --flake "$CONFIG_DIR#nixos-vivobook" "$@"
 
     if [ -n "$COMMITTED" ]; then
       GENERATION=$(sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -1 | awk '{print $1}')
@@ -130,7 +130,7 @@ in
   };
 
   programs.bash.enable = true;
-  # claude-code is a system package (hosts/nixos/default.nix:41), so `claude`
+  # claude-code is a system package (hosts/nixos-vivobook/default.nix:41), so `claude`
   # is always on PATH — no `command -v` guard needed. These land via
   # shellAliases, which home-manager writes AFTER bash's interactive guard;
   # bashrcExtra ran at the very top of .bashrc, before PATH was ready, so the

@@ -31,11 +31,11 @@
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, ... }: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.nixos-vivobook = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
       modules = [
-        ./hosts/nixos/default.nix
+        ./hosts/nixos-vivobook/default.nix
         inputs.agenix.nixosModules.default
         home-manager.nixosModules.home-manager
         {

@@ -16,7 +16,7 @@
     ../../modules/desktop/hyprland.nix
   ];
 
-  networking.hostName = "nixos";
+  networking.hostName = "nixos-vivobook";
 
   users.users.tushar = {
     isNormalUser = true;
