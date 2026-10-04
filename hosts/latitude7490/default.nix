@@ -22,6 +22,11 @@
   # Tailscale since no other host in this flake runs a laptop headlessly.
   services.openssh.enable = true;
 
+  # Default systemd behavior suspends on lid close even when plugged in.
+  # This machine stays reachable over Tailscale as a quasi-server, so keep it
+  # awake on AC; still suspend on battery to not drain it in a bag.
+  services.logind.settings.Login.HandleLidSwitchExternalPower = "ignore";
+
   users.users.tushar = {
     isNormalUser = true;
     description = "tushar";
