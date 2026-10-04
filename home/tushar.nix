@@ -65,6 +65,7 @@ in
     jq
     ripgrep
     fd
+    cmatrix
     # Wayland clipboard provider. Required for nvim's clipboard=unnamedplus
     # (the `+` register) — without it c/cw/y/d error on every op.
     wl-clipboard

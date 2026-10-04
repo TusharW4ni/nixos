@@ -11,6 +11,7 @@
     brightnessctl # brightness keys
     pavucontrol   # audio GUI (handy while setting things up)
     networkmanagerapplet # nm-applet tray icon + nm-connection-editor GUI
+    nwg-displays  # GUI monitor arrangement; writes ~/.config/hypr/monitors.conf
   ];
 
   # App launcher (bound to Super+Space below).
@@ -84,8 +85,11 @@
     configType = "hyprlang";
 
     settings = {
-      # Auto-detect every monitor at its preferred resolution.
+      # Auto-detect every monitor at its preferred resolution. Sourced after:
+      # nwg-displays (GUI) writes explicit per-output rules there, which
+      # override this wildcard for whatever monitor it's been run on.
       monitor = ",preferred,auto,1";
+      source = "~/.config/hypr/monitors.conf";
 
       "$mod" = "SUPER";
 
