@@ -26,4 +26,13 @@
     group = "users";
     mode = "0600";
   };
+
+  # agenix creates ~/.claude-sync to place the two secrets above, but only
+  # chowns the files themselves — the directory stays root-owned. The
+  # claude-sync CLI then can't write its own state file there. `d` re-asserts
+  # ownership/mode on every activation even if the dir already exists, so this
+  # self-heals regardless of agenix/tmpfiles ordering.
+  systemd.tmpfiles.rules = [
+    "d /home/tushar/.claude-sync 0700 tushar users -"
+  ];
 }
