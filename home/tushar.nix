@@ -66,6 +66,7 @@ in
     ripgrep
     fd
     cmatrix
+    unzip
     # Wayland clipboard provider. Required for nvim's clipboard=unnamedplus
     # (the `+` register) — without it c/cw/y/d error on every op.
     wl-clipboard
