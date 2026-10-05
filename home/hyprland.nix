@@ -97,7 +97,7 @@
       exec-once = [
         "waybar"
         "mako"
-        "swaybg -c 1e1e2e"
+        "swaybg -c 000000"
         "nm-applet --indicator" # WiFi tray icon (left-click for network menu)
       ];
 
