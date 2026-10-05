@@ -12,6 +12,7 @@
     pavucontrol   # audio GUI (handy while setting things up)
     networkmanagerapplet # nm-applet tray icon + nm-connection-editor GUI
     nwg-displays  # GUI monitor arrangement; writes ~/.config/hypr/monitors.conf
+    blueman       # Bluetooth manager GUI, opened from the waybar bluetooth module
   ];
 
   # App launcher (bound to Super+Space below).
@@ -29,7 +30,7 @@
       height = 30;
       modules-left = [ "hyprland/workspaces" ];
       modules-center = [ "custom/clock" ];
-      modules-right = [ "pulseaudio" "network" "battery" "tray" ];
+      modules-right = [ "pulseaudio" "bluetooth" "network" "battery" "tray" ];
       # Custom clock: MM (mon) - DD (ddd) | HH:MM:SS, lowercased.
       # e.g. "10 (oct) - 01 (thu) | 07:11:10". Ticks every second.
       "custom/clock" = {
@@ -45,6 +46,12 @@
         format-ethernet = "eth";
         format-disconnected = "offline";
         on-click = "nm-connection-editor"; # click the bar label to manage WiFi
+      };
+      bluetooth = {
+        format = "BT {status}";
+        format-connected = "BT {device_alias}";
+        format-disabled = "BT off";
+        on-click = "blueman-manager"; # click the bar label to manage devices
       };
       pulseaudio = {
         format = "VOL {volume}%";
@@ -68,7 +75,7 @@
       #workspaces button.active {
         background: #313244;
       }
-      #clock, #battery, #network, #pulseaudio, #tray {
+      #clock, #battery, #network, #bluetooth, #pulseaudio, #tray {
         padding: 0 10px;
       }
     '';
