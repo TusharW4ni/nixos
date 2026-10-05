@@ -67,6 +67,7 @@ in
     fd
     cmatrix
     unzip
+    timg
     # Wayland clipboard provider. Required for nvim's clipboard=unnamedplus
     # (the `+` register) — without it c/cw/y/d error on every op.
     wl-clipboard
