@@ -68,6 +68,10 @@ in
     cmatrix
     unzip
     timg
+    # C/C++ toolchain: clang (also provides cc/c++) plus clangd,
+    # clang-format and clang-tidy from clang-tools.
+    clang
+    clang-tools
     # Wayland clipboard provider. Required for nvim's clipboard=unnamedplus
     # (the `+` register) — without it c/cw/y/d error on every op.
     wl-clipboard
