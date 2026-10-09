@@ -113,7 +113,14 @@ in
   # are unaffected.
   programs.nixvim.plugins.render-markdown = {
     enable = true;
-    settings.file_types = [ "treechat" ];
+    settings = {
+      file_types = [ "treechat" ];
+      # Groups defined by treechat: faint block shade, no inline-code background.
+      code = {
+        highlight = "TreechatCode";
+        highlight_inline = "TreechatCodeInline";
+      };
+    };
   };
   programs.nixvim.extraConfigLua = ''
     local treechat_dir = vim.fn.expand("~/p/treechat.nvim")
