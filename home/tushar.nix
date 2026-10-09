@@ -108,6 +108,13 @@ in
   # treechat.nvim: tree-shaped LLM chats on top of pi. Loaded from the local
   # dev checkout so edits apply on nvim restart without a rebuild; skipped
   # when the checkout isn't there.
+  # Renders markdown (code blocks, headings, bullets, tables) in the treechat
+  # transcript only; its buffer uses filetype "treechat", so regular .md files
+  # are unaffected.
+  programs.nixvim.plugins.render-markdown = {
+    enable = true;
+    settings.file_types = [ "treechat" ];
+  };
   programs.nixvim.extraConfigLua = ''
     local treechat_dir = vim.fn.expand("~/p/treechat.nvim")
     if vim.fn.isdirectory(treechat_dir) == 1 then
