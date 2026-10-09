@@ -19,7 +19,8 @@ let
     # operations. Commit provisionally, then amend with the generation number.
     if [ -n "$(git status --porcelain)" ]; then
       git add -A
-      git commit -m "switch: pending ($(date '+%Y-%m-%d %H:%M'))"
+      git --no-pager diff --cached
+      git commit -q -m "switch: pending ($(date '+%Y-%m-%d %H:%M'))"
       COMMITTED=1
     fi
 
@@ -27,7 +28,7 @@ let
 
     if [ -n "$COMMITTED" ]; then
       GENERATION=$(sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -1 | awk '{print $1}')
-      git commit --amend -m "switch: generation $GENERATION ($(date '+%Y-%m-%d %H:%M'))"
+      git commit -q --amend -m "switch: generation $GENERATION ($(date '+%Y-%m-%d %H:%M'))"
       git push origin main
     else
       echo "nixos-switch: nothing new to commit"
