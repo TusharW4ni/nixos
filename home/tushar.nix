@@ -142,7 +142,10 @@ in
     enable = true;
     settings.git_protocol = "https";
     gitCredentialHelper.enable = true;
+    extensions = [ pkgs.gh-dash ];
   };
+
+  programs.lazygit.enable = true;
 
   nix.gc = {
     automatic = true;
