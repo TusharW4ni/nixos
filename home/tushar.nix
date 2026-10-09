@@ -99,7 +99,21 @@ in
     # Source-built from pkgs/claude-sync.nix (bump version there to update;
     # `claude-sync update` can't self-update the read-only Nix store).
     (pkgs.callPackage ../pkgs/claude-sync.nix { })
+    # pi coding agent. Also the harness behind treechat.nvim (pi --mode rpc).
+    # API keys live in ~/.pi/agent (run `pi`, then /login), outside the store.
+    pi-coding-agent
   ];
+
+  # treechat.nvim: tree-shaped LLM chats on top of pi. Loaded from the local
+  # dev checkout so edits apply on nvim restart without a rebuild; skipped
+  # when the checkout isn't there.
+  programs.nixvim.extraConfigLua = ''
+    local treechat_dir = vim.fn.expand("~/p/treechat.nvim")
+    if vim.fn.isdirectory(treechat_dir) == 1 then
+      vim.opt.rtp:prepend(treechat_dir)
+      require("treechat").setup({})
+    end
+  '';
 
   xdg.configFile."herdr/config.toml".source = ./herdr.toml;
 
