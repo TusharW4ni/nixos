@@ -144,10 +144,12 @@ in
   # guard could fail and the aliases silently vanish.
   #   c  -> claude (auto mode)
   #   cw -> claude in a fresh git worktree (auto mode; accepts an optional name)
+  #   ponder -> headless ponder-skill loop: ponder [repo] [sleep-seconds]
   programs.bash.shellAliases = {
     ns = "nixos-switch";
     c = "claude --permission-mode auto";
     cw = "claude --permission-mode auto --worktree";
+    ponder = "~/.claude/skills/ponder/scripts/ponder.sh";
   };
 
   # claude-sync integration: keep sessions synced with the R2 remote.
