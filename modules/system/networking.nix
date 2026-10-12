@@ -3,5 +3,5 @@
 
   services.tailscale.enable = true;
 
-  networking.firewall.allowedTCPPortRanges = [ { from 3000; to 3100; } ];
+  networking.firewall.allowedTCPPortRanges = [ { from = 3000; to = 3100; } ];
 }
