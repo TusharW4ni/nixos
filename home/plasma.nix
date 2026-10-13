@@ -319,9 +319,11 @@
       spectaclerc.General.autoSaveImage = true;
       spectaclerc.General.clipboardGroup = "PostScreenshotCopyLocation";
       spectaclerc.General.useReleaseToCapture = true;
-      spectaclerc.ImageSave.lastImageSaveLocation = "file:///home/tushar/Pictures/Screenshots/Screenshot_20260915_232233.png";
+      spectaclerc.ImageSave.imageSaveLocation = "file:///home/tushar/ss/pics/";
+      spectaclerc.ImageSave.lastImageSaveLocation = "file:///home/tushar/ss/pics/Screenshot_20260915_232233.png";
       spectaclerc.ImageSave.translatedScreenshotsFolder = "Screenshots";
       spectaclerc.VideoSave.translatedScreencastsFolder = "Screencasts";
+      spectaclerc.VideoSave.videoSaveLocation = "file:///home/tushar/ss/vids/";
       spectaclerc.ViewerWindow."2 screens: Height" = 570;
       spectaclerc.ViewerWindow."2 screens: Width" = 774;
     };
