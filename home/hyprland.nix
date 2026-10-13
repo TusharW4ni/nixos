@@ -5,7 +5,7 @@
 let
   # Toggle screen recording. `screenrec region|monitor` starts one; calling it
   # again while wf-recorder runs stops it, and the first call then opens the
-  # file in OpenShot. `screenrec status` prints the waybar label (empty = idle).
+  # file in Shotcut. `screenrec status` prints the waybar label (empty = idle).
   screenrec = pkgs.writeShellScriptBin "screenrec" ''
     if pid=$(pgrep -xo wf-recorder); then
       if [ "$1" = status ]; then
@@ -25,7 +25,7 @@ let
       monitor) wf-recorder -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" -f "$file" ;;
       *) echo "usage: screenrec region|monitor|status" >&2; exit 1 ;;
     esac
-    exec openshot-qt "$file"
+    exec shotcut "$file"
   '';
 in {
   # Wayland tools used by the session / keybinds below. ghostty and
@@ -35,7 +35,7 @@ in {
     slurp         # screenshot region select
     satty         # screenshot preview / annotate
     wf-recorder   # screen recording
-    openshot-qt   # video editor opened after a recording (crop, trim, text)
+    shotcut       # video editor opened after a recording (crop, trim, text)
     screenrec     # recording toggle script (above)
     swaybg        # solid-color / image background
     brightnessctl # brightness keys
@@ -210,7 +210,7 @@ in {
         '', Print, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
         ''$mod, S, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
 
-        # Screen recording toggle (press the same key again to stop) -> OpenShot
+        # Screen recording toggle (press the same key again to stop) -> Shotcut
         "$mod SHIFT, R, exec, screenrec region"
         "$mod, R, exec, screenrec monitor"
       ];
