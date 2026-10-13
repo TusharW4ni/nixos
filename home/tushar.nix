@@ -58,8 +58,8 @@ in
   home.sessionPath = [ "$HOME/.bun/bin" "$HOME/.local/bin" ];
 
   home.packages = with pkgs; [
-    kdePackages.kdenlive
     kdePackages.kate
+    mpv # lightweight video player
     nixos-switch
     # Neovim itself is provided by nixvim (see ./nvim.nix). ripgrep/fd stay
     # here for interactive shell use (nixvim also puts them on nvim's PATH).
