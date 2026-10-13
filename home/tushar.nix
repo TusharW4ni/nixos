@@ -34,6 +34,24 @@ let
       echo "nixos-switch: nothing new to commit"
     fi
   '';
+  # `devices [url]` opens the app as an iPhone and an iPad (WebKit, the engine
+  # Safari uses) plus a desktop Chrome window, all against one dev server.
+  # Each device keeps its own login in ~/.local/state/devices.
+  devices = pkgs.writeShellScriptBin "devices" ''
+    URL="''${1:-http://localhost:3000}"
+    STATE="$HOME/.local/state/devices"
+    mkdir -p "$STATE"
+    open_device() {
+      local name="$1" file="$STATE/$2.json"
+      [ -s "$file" ] || echo '{"cookies":[],"origins":[]}' > "$file"
+      ${pkgs.playwright-test}/bin/playwright open -b webkit --device="$name" \
+        --load-storage="$file" --save-storage="$file" "$URL" &
+    }
+    open_device "iPhone 15 Pro" iphone
+    open_device "iPad Pro 11" ipad
+    google-chrome-stable --new-window "$URL" >/dev/null 2>&1 &
+    wait
+  '';
 in
 {
   imports = [
@@ -61,6 +79,10 @@ in
     kdePackages.kate
     mpv # lightweight video player
     nixos-switch
+    devices
+    # Playwright CLI wired to nixpkgs' own browsers (incl. WebKit); the
+    # browsers Playwright downloads itself don't run on NixOS.
+    playwright-test
     # Neovim itself is provided by nixvim (see ./nvim.nix). ripgrep/fd stay
     # here for interactive shell use (nixvim also puts them on nvim's PATH).
     jq
