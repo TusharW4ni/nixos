@@ -7,6 +7,7 @@
   home.packages = with pkgs; [
     grim          # screenshot capture
     slurp         # screenshot region select
+    satty         # screenshot preview / annotate
     swaybg        # solid-color / image background
     brightnessctl # brightness keys
     pavucontrol   # audio GUI (handy while setting things up)
@@ -164,6 +165,9 @@
 
         # Screenshot region -> clipboard
         ''$mod SHIFT, S, exec, grim -g "$(slurp)" - | wl-copy''
+        # Screenshot monitor under the pointer (follow_mouse=1 keeps it focused) -> satty editor
+        '', Print, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/Pictures/Screenshots/screenshot-%Y%m%d-%H%M%S.png''
+        ''$mod, P, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/Pictures/Screenshots/screenshot-%Y%m%d-%H%M%S.png''
       ];
 
       # Volume / brightness keys (bindel repeats while held).
