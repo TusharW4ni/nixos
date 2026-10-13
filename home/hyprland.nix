@@ -1,13 +1,42 @@
 # Home Manager config for the Hyprland session: keybinds, bar, launcher,
 # notifications, and the small Wayland tool belt it needs. Imported from
 # home/tushar.nix. The system-level enable lives in modules/desktop/hyprland.nix.
-{ pkgs, ... }: {
+{ pkgs, ... }:
+let
+  # Toggle screen recording. `screenrec region|monitor` starts one; calling it
+  # again while wf-recorder runs stops it, and the first call then opens the
+  # file in Shotcut. `screenrec status` prints the waybar label (empty = idle).
+  screenrec = pkgs.writeShellScriptBin "screenrec" ''
+    if pid=$(pgrep -xo wf-recorder); then
+      if [ "$1" = status ]; then
+        echo "● REC $(ps -o etime= -p "$pid" | tr -d ' ')"
+      else
+        pkill -INT -x wf-recorder
+      fi
+      exit 0
+    fi
+    [ "$1" = status ] && exit 0
+
+    mkdir -p ~/ss/vids
+    file=~/ss/vids/recording-$(date +%Y%m%d-%H%M%S).mp4
+    case "$1" in
+      region) geom=$(slurp) || exit 0 # Esc cancels
+              wf-recorder -g "$geom" -f "$file" ;;
+      monitor) wf-recorder -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" -f "$file" ;;
+      *) echo "usage: screenrec region|monitor|status" >&2; exit 1 ;;
+    esac
+    exec shotcut "$file"
+  '';
+in {
   # Wayland tools used by the session / keybinds below. ghostty and
   # wl-clipboard are already in home/tushar.nix, so they're not repeated here.
   home.packages = with pkgs; [
     grim          # screenshot capture
     slurp         # screenshot region select
     satty         # screenshot preview / annotate
+    wf-recorder   # screen recording
+    shotcut       # video editor opened after a recording
+    screenrec     # recording toggle script (above)
     swaybg        # solid-color / image background
     brightnessctl # brightness keys
     pavucontrol   # audio GUI (handy while setting things up)
@@ -15,6 +44,9 @@
     nwg-displays  # GUI monitor arrangement; writes ~/.config/hypr/monitors.conf
     blueman       # Bluetooth manager GUI, opened from the waybar bluetooth module
   ];
+
+  # Screenshots save to ~/ss/pics, recordings to ~/ss/vids. Create both up front so satty can save.
+  systemd.user.tmpfiles.rules = [ "d %h/ss/pics - - - -" "d %h/ss/vids - - - -" ];
 
   # App launcher (bound to Super+Space below).
   programs.wofi.enable = true;
@@ -31,12 +63,18 @@
       height = 30;
       modules-left = [ "hyprland/workspaces" ];
       modules-center = [ "custom/clock" ];
-      modules-right = [ "pulseaudio" "bluetooth" "network" "battery" "tray" ];
+      modules-right = [ "custom/recording" "pulseaudio" "bluetooth" "network" "battery" "tray" ];
       # Custom clock: MM (mon) - DD (ddd) | HH:MM:SS, lowercased.
       # e.g. "10 (oct) - 01 (thu) | 07:11:10". Ticks every second.
       "custom/clock" = {
         exec = "date '+%m (%b) - %d (%a) | %H:%M:%S' | tr '[:upper:]' '[:lower:]'";
         interval = 1;
+      };
+      # Red "● REC 0:42" while recording, hidden otherwise. Click to stop.
+      "custom/recording" = {
+        exec = "screenrec status";
+        interval = 1;
+        on-click = "screenrec";
       };
       battery = {
         format = "BAT {capacity}%";
@@ -76,7 +114,10 @@
       #workspaces button.active {
         background: #313244;
       }
-      #clock, #battery, #network, #bluetooth, #pulseaudio, #tray {
+      #custom-recording {
+        color: #f38ba8;
+      }
+      #custom-recording, #clock, #battery, #network, #bluetooth, #pulseaudio, #tray {
         padding: 0 10px;
       }
     '';
@@ -163,11 +204,15 @@
         "$mod SHIFT, 8, movetoworkspace, 8"
         "$mod SHIFT, 9, movetoworkspace, 9"
 
-        # Screenshot region -> clipboard
-        ''$mod SHIFT, S, exec, grim -g "$(slurp)" - | wl-copy''
+        # Screenshot region -> satty editor
+        ''$mod SHIFT, S, exec, grim -g "$(slurp)" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
         # Screenshot monitor under the pointer (follow_mouse=1 keeps it focused) -> satty editor
-        '', Print, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/Pictures/Screenshots/screenshot-%Y%m%d-%H%M%S.png''
-        ''$mod, P, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/Pictures/Screenshots/screenshot-%Y%m%d-%H%M%S.png''
+        '', Print, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
+        ''$mod, S, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
+
+        # Screen recording toggle (press the same key again to stop) -> Shotcut
+        "$mod SHIFT, R, exec, screenrec region"
+        "$mod, R, exec, screenrec monitor"
       ];
 
       # Volume / brightness keys (bindel repeats while held).
