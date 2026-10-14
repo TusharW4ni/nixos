@@ -14,6 +14,7 @@
     ../../modules/system/nix-ld.nix
     ../../modules/desktop/plasma.nix
     ../../modules/desktop/hyprland.nix
+    ../../modules/desktop/steam.nix
   ];
 
   networking.hostName = "nixos-vivobook";
