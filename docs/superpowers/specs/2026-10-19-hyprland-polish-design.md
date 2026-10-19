@@ -44,7 +44,7 @@ Supporting research for every section is in `docs/superpowers/specs/2026-10-19-h
 ## Hardware and environment facts
 
 - ASUS Vivobook 16 (X1603ZA). Internal eDP-1 is 1920×1200 at about 141 DPI. External HDMI-A-1 is 1920×1080 at about 102 DPI. Both run at scale 1.
-- Hyprland 0.56.2, configured in hyprlang (`configType = "hyprlang"`). Hyprlang is deprecated in favor of Lua. Stay on hyprlang for this project, and run `hyprctl configerrors` after each switch.
+- Hyprland 0.56.2. The config moved to **Lua** mid-project (user request; hyprlang support goes away in 0.57). It lives in `home/hypr/*.lua`, installed through home-manager `extraLuaFiles`. Every bind carries a `description`. Validate with `Hyprland --verify-config`.
 - Chrome profile `Default` is the parone.com profile (tushar.wani@parone.com).
 - The flake already pins everything needed: vicinae 0.29, yazi 26.9.1, wifitui, bluetui, wiremix, gum, hypridle/hyprlock/hyprsunset, batsignal, tuigreet, rclone 1.75.1 and the fonts. See the research files for versions.
 
@@ -230,7 +230,7 @@ Configure it with home-manager `programs.vicinae` (see `launcher.md`). It replac
   - logind's defaults already suspend undocked and ignore the lid when docked. Set `HandleLidSwitch = "suspend"` and `HandleLidSwitchDocked = "ignore"` explicitly anyway, since Plasma no longer covers it.
   - A Hyprland `bindl = , switch:on:Lid Switch` disables eDP-1. `switch:off` runs `hyprctl reload`, so the position comes from `monitors.conf` rather than being hard-coded.
   - hypridle's `before_sleep_cmd` provides the lock.
-- **The monitor layout stays mutable** in `~/.config/hypr/monitors.conf`, sourced after the `,preferred,auto,1` wildcard. It's the one sanctioned piece of state outside the repo.
+- **The monitor layout stays mutable** in `~/.config/hypr/hyprmon.lua`. `main.lua` loads it with `pcall(dofile, …)`, after the preferred/auto wildcard. It was translated once from the old nwg-displays `monitors.conf`. It's the one sanctioned piece of state outside the repo.
 - **hyprmon replaces nwg-displays** as its editor (my call; the user asked for a TUI alternative). hyprmon is a TUI that shows the monitors as boxes you drag around, with live apply and profiles; nixpkgs has `hyprmon` 0.0.17.
   - **Write target:** hyprmon writes to `$HYPRLAND_CONFIG`, or by default to `hyprland.conf`. `hyprland.conf` is a read-only home-manager symlink, so wrap hyprmon with `HYPRLAND_CONFIG=$HOME/.config/hypr/monitors.conf`.
   - **Check before relying on it:** does hyprmon only rewrite the `monitor=` lines in that file, and does it cope with the file being sourced instead of being the main config? If it can't be pointed safely at `monitors.conf`, tell the user and keep nwg-displays.
