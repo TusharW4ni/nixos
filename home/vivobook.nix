@@ -2,6 +2,7 @@
 { ... }: {
   imports = [
     ./hyprland.nix
+    ./terminal.nix
   ];
 
   # Polkit password prompts (none ran under Hyprland before).

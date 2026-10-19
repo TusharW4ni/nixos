@@ -163,6 +163,14 @@ in {
         gaps_in = 4;
         gaps_out = 8;
         border_size = 2;
+        "col.active_border" = "rgb(5c5c5c)";
+        "col.inactive_border" = "rgb(1c1c1c)";
+      };
+
+      misc = {
+        background_color = "rgb(000000)";
+        disable_hyprland_logo = true;
+        disable_splash_rendering = true;
       };
 
       decoration.rounding = 6;

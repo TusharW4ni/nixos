@@ -99,7 +99,6 @@ in
     python3
     discord
     slack
-    ghostty
     obsidian
     freecad
     blender
