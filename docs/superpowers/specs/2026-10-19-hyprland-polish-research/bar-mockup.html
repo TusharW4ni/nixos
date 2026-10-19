@@ -1,0 +1,97 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Geist:wght@400;500&display=swap');
+.bar{background:#000;color:#e6e6e6;display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:36px;border-radius:4px;margin:6px 0 4px;font-size:15px}
+.bar .l,.bar .r{display:flex;gap:18px;align-items:center;min-width:180px}
+.bar .r{justify-content:flex-end}
+.dim{color:#6b6b6b}
+.ws span{padding:0 6px;color:#555}
+.ws span.on{color:#fff}
+.dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#3a3a3a;margin:0 4px}
+.dots span.on{background:#fff}
+.dots span.has{background:#777}
+svg.i{width:17px;height:17px;stroke:#bdbdbd;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+svg.i.warn{stroke:#f5a524}
+.desk{background:#111;padding:10px;border-radius:6px}
+.state{font-size:12px;color:#888;margin:2px 0 8px 4px}
+</style>
+
+<!-- thin line icons -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="vol" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  <symbol id="wifi" viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r=".6"/></symbol>
+  <symbol id="bt" viewBox="0 0 24 24"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></symbol>
+  <symbol id="bat" viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M5 10v4M8 10v4M11 10v4M14 10v4" /></symbol>
+  <symbol id="batlow" viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M5 10v4"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M8.7 3A6 6 0 0 1 18 8a21 21 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.7 4.7 0 0 1 .3-1.7"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/><path d="m2 2 20 20"/></symbol>
+</svg>
+
+<h2>Status bar, round 2: less text, quieter icons</h2>
+<p class="subtitle">Pure black. Thin grey line icons instead of emoji. Each bar shown in a normal state and an "something needs attention" state.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Almost nothing</h3>
+      <div class="desk">
+        <div class="bar" style="font-family:'Inter'">
+          <div class="l dots"><span class="has"></span><span class="on"></span><span class="has"></span><span></span></div>
+          <div>14:32</div>
+          <div class="r"></div>
+        </div>
+        <div class="state">normal: workspaces + time, that's it</div>
+        <div class="bar" style="font-family:'Inter'">
+          <div class="l dots"><span class="has"></span><span class="on"></span><span class="has"></span><span></span></div>
+          <div>14:32</div>
+          <div class="r"><svg class="i warn"><use href="#bell"/></svg><svg class="i warn"><use href="#batlow"/></svg><span style="color:#f5a524">14%</span></div>
+        </div>
+        <div class="state">things appear only when they matter: DND on, battery low, recording, no wifi</div>
+      </div>
+      <p>Hover the clock for the full date.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Icons only, no numbers</h3>
+      <div class="desk">
+        <div class="bar" style="font-family:'Geist'">
+          <div class="l ws"><span>1</span><span class="on">2</span><span>3</span><span>4</span></div>
+          <div>Fri 16 <span class="dim">·</span> 14:32</div>
+          <div class="r"><svg class="i"><use href="#vol"/></svg><svg class="i"><use href="#bt"/></svg><svg class="i"><use href="#wifi"/></svg><svg class="i"><use href="#bat"/></svg></div>
+        </div>
+        <div class="state">normal</div>
+        <div class="bar" style="font-family:'Geist'">
+          <div class="l ws"><span>1</span><span class="on">2</span><span>3</span><span>4</span></div>
+          <div>Fri 16 <span class="dim">·</span> 14:32</div>
+          <div class="r"><svg class="i warn"><use href="#bell"/></svg><svg class="i"><use href="#vol"/></svg><svg class="i"><use href="#bt"/></svg><svg class="i"><use href="#wifi"/></svg><svg class="i warn"><use href="#batlow"/></svg></div>
+        </div>
+        <div class="state">DND on + low battery</div>
+      </div>
+      <p>Always-visible status, details on hover or click.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Icons + one number</h3>
+      <div class="desk">
+        <div class="bar" style="font-family:'Inter'">
+          <div class="l ws"><span>1</span><span class="on">2</span><span>3</span><span>4</span></div>
+          <div>Fri 16 Oct <span class="dim">·</span> 14:32</div>
+          <div class="r"><svg class="i"><use href="#vol"/></svg><svg class="i"><use href="#wifi"/></svg><span><svg class="i"><use href="#bat"/></svg> <span class="dim">82%</span></span></div>
+        </div>
+        <div class="state">normal: only battery shows a number</div>
+        <div class="bar" style="font-family:'Inter'">
+          <div class="l ws"><span>1</span><span class="on">2</span><span>3</span><span>4</span></div>
+          <div>Fri 16 Oct <span class="dim">·</span> 14:32</div>
+          <div class="r"><svg class="i warn"><use href="#bell"/></svg><svg class="i"><use href="#vol"/></svg><svg class="i"><use href="#wifi"/></svg><span style="color:#f5a524"><svg class="i warn"><use href="#batlow"/></svg> 14%</span></div>
+        </div>
+        <div class="state">DND on + low battery</div>
+      </div>
+      <p>Bluetooth icon only shows while something is connected.</p>
+    </div>
+  </div>
+</div>
