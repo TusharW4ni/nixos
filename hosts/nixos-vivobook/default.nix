@@ -12,7 +12,7 @@
     ../../modules/system/docker.nix
     ../../modules/system/syncthing.nix
     ../../modules/system/nix-ld.nix
-    ../../modules/desktop/plasma.nix
+    ../../modules/desktop/session.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/desktop/steam.nix
   ];

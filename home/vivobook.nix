@@ -3,4 +3,7 @@
   imports = [
     ./hyprland.nix
   ];
+
+  # Polkit password prompts (none ran under Hyprland before).
+  services.hyprpolkitagent.enable = true;
 }
