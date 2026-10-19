@@ -39,10 +39,6 @@ in {
     screenrec     # recording toggle script (above)
     swaybg        # solid-color / image background
     brightnessctl # brightness keys
-    pavucontrol   # audio GUI (handy while setting things up)
-    networkmanagerapplet # nm-applet tray icon + nm-connection-editor GUI
-    nwg-displays  # GUI monitor arrangement; writes ~/.config/hypr/monitors.conf
-    blueman       # Bluetooth manager GUI, opened from the waybar bluetooth module
   ];
 
   # Screenshots save to ~/ss/pics, recordings to ~/ss/vids. Create both up front so satty can save.

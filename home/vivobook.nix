@@ -6,6 +6,7 @@
     ./waybar.nix
     ./notifications.nix
     ./vicinae.nix
+    ./hub.nix
   ];
 
   # Polkit password prompts (none ran under Hyprland before).

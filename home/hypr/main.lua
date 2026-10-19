@@ -71,7 +71,6 @@ bind(mod .. " + SHIFT + V", run("vicinae deeplink vicinae://launch/clipboard/his
 bind(mod .. " + C", hl.dsp.window.close(), "Close window")
 bind(mod .. " + F", hl.dsp.window.fullscreen(), "Fullscreen")
 bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }), "Toggle floating")
-bind(mod .. " + SHIFT + M", hl.dsp.exit(), "Exit Hyprland")
 
 -- Focus
 for _, dir in ipairs({ "left", "right", "up", "down" }) do
