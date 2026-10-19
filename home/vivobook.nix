@@ -3,6 +3,7 @@
   imports = [
     ./hyprland.nix
     ./terminal.nix
+    ./waybar.nix
   ];
 
   # Polkit password prompts (none ran under Hyprland before).

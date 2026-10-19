@@ -54,75 +54,6 @@ in {
   # Notification daemon.
   services.mako.enable = true;
 
-  # Status bar.
-  programs.waybar = {
-    enable = true;
-    settings.mainBar = {
-      layer = "top";
-      position = "top";
-      height = 30;
-      modules-left = [ "hyprland/workspaces" ];
-      modules-center = [ "custom/clock" ];
-      modules-right = [ "custom/recording" "pulseaudio" "bluetooth" "network" "battery" "tray" ];
-      # Custom clock: MM (mon) - DD (ddd) | HH:MM:SS, lowercased.
-      # e.g. "10 (oct) - 01 (thu) | 07:11:10". Ticks every second.
-      "custom/clock" = {
-        exec = "date '+%m (%b) - %d (%a) | %H:%M:%S' | tr '[:upper:]' '[:lower:]'";
-        interval = 1;
-      };
-      # Red "● REC 0:42" while recording, hidden otherwise. Click to stop.
-      "custom/recording" = {
-        exec = "screenrec status";
-        interval = 1;
-        on-click = "screenrec";
-      };
-      battery = {
-        format = "BAT {capacity}%";
-        format-charging = "CHG {capacity}%";
-      };
-      network = {
-        format-wifi = "{essid} ({signalStrength}%)";
-        format-ethernet = "eth";
-        format-disconnected = "offline";
-        on-click = "nm-connection-editor"; # click the bar label to manage WiFi
-      };
-      bluetooth = {
-        format = "BT {status}";
-        format-connected = "BT {device_alias}";
-        format-disabled = "BT off";
-        on-click = "blueman-manager"; # click the bar label to manage devices
-      };
-      pulseaudio = {
-        format = "VOL {volume}%";
-        format-muted = "muted";
-        on-click = "pavucontrol";
-      };
-    };
-    style = ''
-      * {
-        font-family: monospace;
-        font-size: 13px;
-      }
-      window#waybar {
-        background: #1e1e2e;
-        color: #cdd6f4;
-      }
-      #workspaces button {
-        padding: 0 8px;
-        color: #cdd6f4;
-      }
-      #workspaces button.active {
-        background: #313244;
-      }
-      #custom-recording {
-        color: #f38ba8;
-      }
-      #custom-recording, #clock, #battery, #network, #bluetooth, #pulseaudio, #tray {
-        padding: 0 10px;
-      }
-    '';
-  };
-
   # Hyprland window manager config.
   wayland.windowManager.hyprland = {
     enable = true;
@@ -144,7 +75,6 @@ in {
 
       # Start the bar, notification daemon, and a solid background on login.
       exec-once = [
-        "waybar"
         "mako"
         "swaybg -c 000000"
         "nm-applet --indicator" # WiFi tray icon (left-click for network menu)
