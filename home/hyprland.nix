@@ -48,9 +48,6 @@ in {
   # Screenshots save to ~/ss/pics, recordings to ~/ss/vids. Create both up front so satty can save.
   systemd.user.tmpfiles.rules = [ "d %h/ss/pics - - - -" "d %h/ss/vids - - - -" ];
 
-  # App launcher (bound to Super+Space below).
-  programs.wofi.enable = true;
-
   # Hyprland window manager config, written in Lua (hyprlang is deprecated
   # and removed in 0.57). The config itself lives in ./hypr/main.lua.
   wayland.windowManager.hyprland = {

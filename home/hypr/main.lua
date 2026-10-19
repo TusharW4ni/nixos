@@ -52,6 +52,8 @@ hl.config({
   },
 })
 
+hl.layer_rule({ name = "vicinae-no-anim", match = { namespace = "vicinae" }, no_anim = true })
+
 ------------------------------------------------------------------------------
 -- Autostart
 ------------------------------------------------------------------------------
@@ -64,7 +66,8 @@ end)
 ------------------------------------------------------------------------------
 -- Apps and windows
 bind(mod .. " + Q", run("ghostty"), "Terminal")
-bind(mod .. " + SPACE", run("wofi --show drun"), "Launcher")
+bind(mod .. " + SPACE", run("vicinae toggle"), "Launcher (apps, calc, f files, v clipboard, c Claude)")
+bind(mod .. " + SHIFT + V", run("vicinae deeplink vicinae://launch/clipboard/history"), "Clipboard history")
 bind(mod .. " + C", hl.dsp.window.close(), "Close window")
 bind(mod .. " + F", hl.dsp.window.fullscreen(), "Fullscreen")
 bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }), "Toggle floating")
