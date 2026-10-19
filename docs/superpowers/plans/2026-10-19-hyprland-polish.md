@@ -414,6 +414,23 @@ echo PASS
   - **hyprmon:** open it, move nothing, and save. Expected: only `monitor=` lines change in `~/.config/hypr/monitors.conf`, and `hyprland.conf` is untouched. If it writes anything else, revert to nwg-displays and tell the user (spec §9b).
   - **`hyprctl dispatch dpms off`:** run it by hand. If the syntax is rejected on 0.56, switch the hypridle listener to the working form.
 
+### Task 7b: Keybind cheat sheet (spec §8b, added mid-execution)
+
+**Files:**
+- Modify: `home/hyprland.nix` and every file that adds binds (`home/hub.nix`, `home/vicinae.nix`). Convert each `bind`/`bindl`/`bindel`/`bindm` entry to its description form (`bindd`, `bindld`, `bindeld`, `bindmd`), with a short description: `"$mod SHIFT, S, Screenshot region, exec, shot region"`.
+- Create: `home/scripts/keys.sh`. It turns `hyprctl binds -j` into lines like `Super+Shift+S   Screenshot region`, sorted, then pipes them into `fzf --no-sort --layout=reverse`. It decodes the modmask bits: 64 Super, 1 Shift, 4 Ctrl, 8 Alt.
+- Modify: `home/hub.nix`. Add a `keys` section, and bind `$mod, slash` → `ghostty --class=dev.tushar.hub -e hub keys`. Modify `home/vicinae.nix`: add a `keys` script entry.
+
+- [ ] **Step 1: Write the failing check**
+  Run: `hyprctl binds -j | jq '[.[] | select(.has_description)] | length'`
+  Expected now: 0.
+- [ ] **Step 2: Write a self-check for the decoder.** `tests/keys-test.sh` sources `keys.sh` functions and asserts that `mods 65` prints `Super+Shift` and that `mods 0` prints nothing. Run it and watch it fail.
+- [ ] **Step 3: Implement the conversion and `keys.sh`. Run the self-check:** PASS.
+- [ ] **Step 4: Build and commit** (`feat: which-key style keybind cheat sheet`).
+- [ ] **Step 5: Runtime check** (after a switch):
+  - The Step 1 command returns the number of binds.
+  - Super+/ shows the list, typing `screen` filters to the screenshot and recording binds, and Esc closes it.
+
 ### Task 8: yazi
 
 Start from: `theming.md` §5 and `gdrive.md` §5.

@@ -195,6 +195,16 @@ Configure it with home-manager `programs.vicinae` (see `launcher.md`). It replac
   - "Reset" empties the overrides file.
   - Validate input: a non-integer value silently drops that listener.
 
+### 8b. Keybind cheat sheet (user request: "which-key for system keybinds")
+
+- **Super+/** opens a floating black window with every Hyprland keybind and a description of each. Type to fuzzy-filter, Esc closes.
+- **Source of truth:** Hyprland itself, read live through `hyprctl binds -j`. The list can't drift from the config.
+  - **Descriptions:** every bind is written in the description form (`bindd`/`bindld`/`bindeld`/`bindmd`).
+  - **Binds without a description:** listed by their dispatcher, as a fallback.
+- **Display:** keys are shown human-readable, e.g. `Super+Shift+S  Screenshot region`. The list is grouped or sorted by modifier.
+- **Also reachable** from the hub (a "keys" section) and from Vicinae ("Keybinds").
+- **Choice:** a small script (`keys`) using `hyprctl` + `jq` + `fzf` or gum. My call, and no new app. If Hyprland's description binds don't work with hyprlang on 0.56, put the descriptions in Nix next to each bind instead.
+
 ### 9. Lock, idle, power
 
 - **Idle defaults** (my call; changeable from the hub):
