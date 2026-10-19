@@ -1,6 +1,6 @@
 # Status bar: pure black, Atkinson Hyperlegible Next, thin Lucide line icons.
 # Approved look: docs/superpowers/specs/2026-10-19-hyprland-polish-research/bar-mockup.html (variant C).
-# Signals: 8 = DND (dnd status), 9 = mic.
+# Signals: 8 = DND (dnd toggle refreshes it), 9 = mic.
 { pkgs, ... }:
 let
   # Lucide maps letters and digits to icons too, so it's only ever used
@@ -53,7 +53,7 @@ in
       "custom/dnd" = {
         exec = "dnd status";
         return-type = "json";
-        interval = "once";
+        interval = 2; # keeps the hidden count fresh
         signal = 8;
         on-click = "dnd";
       };

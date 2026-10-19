@@ -51,9 +51,6 @@ in {
   # App launcher (bound to Super+Space below).
   programs.wofi.enable = true;
 
-  # Notification daemon.
-  services.mako.enable = true;
-
   # Hyprland window manager config.
   wayland.windowManager.hyprland = {
     enable = true;
@@ -75,7 +72,7 @@ in {
 
       # Start the bar, notification daemon, and a solid background on login.
       exec-once = [
-        "mako"
+        "dnd watch" # keeps Slack/Discord muted while DND is on
         "swaybg -c 000000"
         "nm-applet --indicator" # WiFi tray icon (left-click for network menu)
       ];
@@ -142,15 +139,27 @@ in {
         "$mod SHIFT, 8, movetoworkspace, 8"
         "$mod SHIFT, 9, movetoworkspace, 9"
 
-        # Screenshot region -> satty editor
-        ''$mod SHIFT, S, exec, grim -g "$(slurp)" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
-        # Screenshot monitor under the pointer (follow_mouse=1 keeps it focused) -> satty editor
-        '', Print, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
-        ''$mod, S, exec, grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" - | satty --filename - --output-filename ~/ss/pics/screenshot-%Y%m%d-%H%M%S.png''
+        # Screenshots: copied + saved to ~/ss/pics; click the banner to edit in satty
+        "$mod SHIFT, S, exec, shot region"
+        ", Print, exec, shot monitor"
+        "$mod, S, exec, shot monitor"
+
+        # Notifications
+        "$mod, D, exec, dnd"
+        "$mod, N, exec, makoctl restore"
+        "$mod SHIFT, N, exec, makoctl dismiss -a"
 
         # Screen recording toggle (press the same key again to stop) -> Shotcut
         "$mod SHIFT, R, exec, screenrec region"
         "$mod, R, exec, screenrec monitor"
+      ];
+
+      # Media keys; bindl so they also work on the lock screen.
+      bindl = [
+        ", XF86AudioPlay, exec, media play-pause"
+        ", XF86AudioPause, exec, media play-pause"
+        ", XF86AudioNext, exec, media next"
+        ", XF86AudioPrev, exec, media previous"
       ];
 
       # Volume / brightness keys (bindel repeats while held).
