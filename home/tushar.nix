@@ -55,10 +55,7 @@ let
 in
 {
   imports = [
-    inputs.plasma-manager.homeModules.plasma-manager
     inputs.nixvim.homeModules.nixvim
-    ./plasma.nix
-    ./hyprland.nix
     # nixvim config sourced from the nvim repo's nixvim branch (see flake input)
     "${inputs.nvim-config}/nvim.nix"
   ];
@@ -76,7 +73,6 @@ in
   home.sessionPath = [ "$HOME/.bun/bin" "$HOME/.local/bin" ];
 
   home.packages = with pkgs; [
-    kdePackages.kate
     mpv # lightweight video player
     nixos-switch
     devices

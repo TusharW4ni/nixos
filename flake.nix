@@ -43,7 +43,7 @@
           home-manager.useUserPackages = true;
           home-manager.backupFileExtension = "hm-bak";
           home-manager.extraSpecialArgs = { inherit inputs; };
-          home-manager.users.tushar = import ./home/tushar.nix;
+          home-manager.users.tushar.imports = [ ./home/tushar.nix ./home/vivobook.nix ];
         }
       ];
     };
@@ -60,7 +60,7 @@
           home-manager.useUserPackages = true;
           home-manager.backupFileExtension = "hm-bak";
           home-manager.extraSpecialArgs = { inherit inputs; };
-          home-manager.users.tushar = import ./home/tushar.nix;
+          home-manager.users.tushar.imports = [ ./home/tushar.nix ./home/latitude.nix ];
         }
       ];
     };
