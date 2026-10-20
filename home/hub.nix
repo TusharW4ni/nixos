@@ -109,13 +109,19 @@ in
     enable = true;
     settings =
       let
+        # Mimic the Linux console grid tuigreet draws on: 8x16 px cells.
+        # font_size is in points (px = pt * 4/3); JetBrains Mono's advance is
+        # 0.6 em, so 10pt gives 8px-wide cells.
         mono = "JetBrains Mono";
-        size = 14;
-        cw = 0.6 * size; # JetBrains Mono advance: 600/1000 em
+        size = 10;
+        cw = 0.6 * size * 4 / 3;
+        lh = 16;
         grey = "rgb(5c5c5c)";
         white = "rgb(e6e6e6)";
-        box = { w = 80 * cw; h = 6 * size * 1.4; };
-        left = -box.w / 2 + 2 * cw; # text starts two cells in from the border
+        # tuigreet's box: 80 columns, the border running through the middle of
+        # the first/last cell, one blank row above and below the prompts.
+        box = { w = 79 * cw; h = 5 * lh; };
+        left = -box.w / 2 + 1.5 * cw; # prompts start in column 2
         px = n: toString (builtins.floor n);
         # A row of `chars` visible characters whose left edge is at `left`.
         row = markup: chars: y: {
@@ -128,7 +134,8 @@ in
           halign = "center";
           valign = "center";
         };
-        key = k: "<span background='#e6e6e6' foreground='#000000'>${k}</span>";
+        # "##" is a literal "#" in hyprlang ("#" starts a comment).
+        key = k: "<span background='##e6e6e6' foreground='##000000'>${k}</span>";
       in
       {
         general.hide_cursor = true;
@@ -152,26 +159,26 @@ in
             color = grey;
             font_size = size;
             font_family = mono;
-            position = "0, -16";
+            position = "0, -15";
             halign = "center";
             valign = "top";
           }
-          (row "<b>Username:</b> tushar" 16 12)
-          (row "<b>Password:</b>" 9 (-12))
+          (row "<b>Username:</b> tushar" 16 (lh / 2))
+          (row "<b>Password:</b>" 9 (-lh / 2))
           {
             monitor = "";
             text = "${key "ESC"} Clear ${key "ENTER"} Unlock";
             color = grey;
             font_size = size;
             font_family = mono;
-            position = "12, 10";
+            position = "8, 0";
             halign = "left";
             valign = "bottom";
           }
         ];
         input-field = [{
           monitor = "";
-          size = "${px (40 * cw)}, ${px (size * 1.6)}";
+          size = "${px (40 * cw)}, ${toString lh}";
           outline_thickness = 0;
           rounding = 0;
           inner_color = "rgb(000000)";
@@ -180,14 +187,14 @@ in
           fail_color = "rgb(000000)";
           font_family = mono;
           dots_text_format = "*";
-          dots_size = 0.5;
+          dots_size = 0.9;
           dots_spacing = 0.1;
           dots_center = false;
           placeholder_text = "";
           fail_text = ''<span foreground="##ff8080">wrong password</span>'';
           fade_on_empty = false;
           # Starts right after "Password: " (10 cells); 40 cells wide.
-          position = "${px (left + 10 * cw + 20 * cw)}, -12";
+          position = "${px (left + 10 * cw + 20 * cw)}, ${toString (-lh / 2)}";
           halign = "center";
           valign = "center";
         }];
