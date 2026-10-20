@@ -102,35 +102,40 @@ in
     "f %h/.local/state/hypridle/overrides.conf - - - -"
   ];
 
-  # Lock screen, styled like the tuigreet login: black, monospace, a thin
-  # grey box with "Username:" / "Password:" rows and the date/time above it.
+  # Lock screen, styled like the tuigreet login: black, monospace, the date
+  # on top, an 80-column box with a thin grey border holding bold
+  # "Username:" / "Password:" rows, and a key-hint bar bottom-left.
   programs.hyprlock = {
     enable = true;
     settings =
       let
         mono = "JetBrains Mono";
+        size = 14;
+        cw = 0.6 * size; # JetBrains Mono advance: 600/1000 em
         grey = "rgb(5c5c5c)";
         white = "rgb(e6e6e6)";
-        # Rows start at the same left edge; JetBrains Mono at 15px is ~9px/char.
-        left = -130;
-        textAt = chars: y: "${toString (left + chars * 9 / 2)}, ${toString y}";
-        text = t: y: {
+        box = { w = 80 * cw; h = 6 * size * 1.4; };
+        left = -box.w / 2 + 2 * cw; # text starts two cells in from the border
+        px = n: toString (builtins.floor n);
+        # A row of `chars` visible characters whose left edge is at `left`.
+        row = markup: chars: y: {
           monitor = "";
-          text = t;
+          text = markup;
           color = white;
-          font_size = 15;
+          font_size = size;
           font_family = mono;
-          position = textAt (builtins.stringLength t) y;
+          position = "${px (left + chars * cw / 2)}, ${toString y}";
           halign = "center";
           valign = "center";
         };
+        key = k: "<span background='#e6e6e6' foreground='#000000'>${k}</span>";
       in
       {
         general.hide_cursor = true;
         background = [{ monitor = ""; color = "rgb(000000)"; }];
         shape = [{
           monitor = "";
-          size = "520, 150";
+          size = "${px box.w}, ${px box.h}";
           color = "rgb(000000)";
           rounding = 0;
           border_size = 1;
@@ -143,21 +148,30 @@ in
         label = [
           {
             monitor = "";
-            text = ''cmd[update:1000] date '+%a, %d %b %Y - %H:%M:%S' '';
+            text = ''cmd[update:1000] date '+%a, %d %b %Y - %H:%M' '';
             color = grey;
-            font_size = 15;
+            font_size = size;
             font_family = mono;
-            position = "0, -24";
+            position = "0, -16";
             halign = "center";
             valign = "top";
           }
-          (text "Unlock nixos-vivobook" 45)
-          (text "Username: tushar" 10)
-          (text "Password:" (-25))
+          (row "<b>Username:</b> tushar" 16 12)
+          (row "<b>Password:</b>" 9 (-12))
+          {
+            monitor = "";
+            text = "${key "ESC"} Clear ${key "ENTER"} Unlock";
+            color = grey;
+            font_size = size;
+            font_family = mono;
+            position = "12, 10";
+            halign = "left";
+            valign = "bottom";
+          }
         ];
         input-field = [{
           monitor = "";
-          size = "200, 30";
+          size = "${px (40 * cw)}, ${px (size * 1.6)}";
           outline_thickness = 0;
           rounding = 0;
           inner_color = "rgb(000000)";
@@ -172,7 +186,8 @@ in
           placeholder_text = "";
           fail_text = ''<span foreground="##ff8080">wrong password</span>'';
           fade_on_empty = false;
-          position = "${toString (left + 90 + 100)}, -25";
+          # Starts right after "Password: " (10 cells); 40 cells wide.
+          position = "${px (left + 10 * cw + 20 * cw)}, -12";
           halign = "center";
           valign = "center";
         }];
