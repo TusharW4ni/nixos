@@ -73,7 +73,6 @@ in
   home.sessionPath = [ "$HOME/.bun/bin" "$HOME/.local/bin" ];
 
   home.packages = with pkgs; [
-    mpv # lightweight video player
     nixos-switch
     devices
     # Playwright CLI wired to nixpkgs' own browsers (incl. WebKit); the

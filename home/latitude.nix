@@ -6,5 +6,5 @@
     ./plasma.nix
   ];
 
-  home.packages = with pkgs; [ kdePackages.kate ghostty ];
+  home.packages = with pkgs; [ kdePackages.kate ghostty mpv ];
 }
