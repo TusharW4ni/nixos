@@ -102,42 +102,81 @@ in
     "f %h/.local/state/hypridle/overrides.conf - - - -"
   ];
 
-  # Lock screen: black, a clock and a password field.
+  # Lock screen, styled like the tuigreet login: black, monospace, a thin
+  # grey box with "Username:" / "Password:" rows and the date/time above it.
   programs.hyprlock = {
     enable = true;
-    settings = {
-      general.hide_cursor = true;
-      background = [{ monitor = ""; color = "rgb(000000)"; }];
-      label = [{
-        monitor = "";
-        text = "$TIME";
-        color = "rgb(e6e6e6)";
-        font_size = 64;
-        font_family = "Atkinson Hyperlegible Next";
-        position = "0, 120";
-        halign = "center";
-        valign = "center";
-      }];
-      input-field = [{
-        monitor = "";
-        size = "280, 44";
-        outline_thickness = 1;
-        rounding = 6;
-        outer_color = "rgb(333333)";
-        inner_color = "rgb(000000)";
-        font_color = "rgb(e6e6e6)";
-        check_color = "rgb(5c5c5c)";
-        fail_color = "rgb(ff8080)";
-        font_family = "Atkinson Hyperlegible Next";
-        placeholder_text = "";
-        fail_text = "";
-        dots_center = true;
-        fade_on_empty = false;
-        position = "0, -20";
-        halign = "center";
-        valign = "center";
-      }];
-    };
+    settings =
+      let
+        mono = "JetBrains Mono";
+        grey = "rgb(5c5c5c)";
+        white = "rgb(e6e6e6)";
+        # Rows start at the same left edge; JetBrains Mono at 15px is ~9px/char.
+        left = -130;
+        textAt = chars: y: "${toString (left + chars * 9 / 2)}, ${toString y}";
+        text = t: y: {
+          monitor = "";
+          text = t;
+          color = white;
+          font_size = 15;
+          font_family = mono;
+          position = textAt (builtins.stringLength t) y;
+          halign = "center";
+          valign = "center";
+        };
+      in
+      {
+        general.hide_cursor = true;
+        background = [{ monitor = ""; color = "rgb(000000)"; }];
+        shape = [{
+          monitor = "";
+          size = "520, 150";
+          color = "rgb(000000)";
+          rounding = 0;
+          border_size = 1;
+          border_color = grey;
+          zindex = -1; # under the text
+          position = "0, 0";
+          halign = "center";
+          valign = "center";
+        }];
+        label = [
+          {
+            monitor = "";
+            text = ''cmd[update:1000] date '+%a, %d %b %Y - %H:%M:%S' '';
+            color = grey;
+            font_size = 15;
+            font_family = mono;
+            position = "0, -24";
+            halign = "center";
+            valign = "top";
+          }
+          (text "Unlock nixos-vivobook" 45)
+          (text "Username: tushar" 10)
+          (text "Password:" (-25))
+        ];
+        input-field = [{
+          monitor = "";
+          size = "200, 30";
+          outline_thickness = 0;
+          rounding = 0;
+          inner_color = "rgb(000000)";
+          font_color = white;
+          check_color = "rgb(000000)";
+          fail_color = "rgb(000000)";
+          font_family = mono;
+          dots_text_format = "*";
+          dots_size = 0.5;
+          dots_spacing = 0.1;
+          dots_center = false;
+          placeholder_text = "";
+          fail_text = ''<span foreground="##ff8080">wrong password</span>'';
+          fade_on_empty = false;
+          position = "${toString (left + 90 + 100)}, -25";
+          halign = "center";
+          valign = "center";
+        }];
+      };
   };
 
   # Night light. hyprsunset 0.4 only reads $XDG_CONFIG_HOME/hypr/hyprsunset.conf,
