@@ -6,8 +6,8 @@ let
   # Lucide maps letters and digits to icons too, so it's only ever used
   # inside a span, never in the font-family list. Codepoints: lucide 0.563.0.
   ic = cp: "<span font_family='lucide'>&#x${cp};</span>";
-  # Battery glyphs are short and wide, so they sit visibly above the digits
-  # next to them; nudge them down (rise is in Pango units, 1024 = 1pt).
+  # Battery and wifi glyphs sit visibly above the text next to them;
+  # nudge them down (rise is in Pango units, 1024 = 1pt).
   icLow = cp: "<span font_family='lucide' rise='-1600'>&#x${cp};</span>";
   dim = text: "<span color='#5c5c5c'>${text}</span>";
 
@@ -125,7 +125,7 @@ in
         on-click = "hub bluetooth";
       };
       network = {
-        format-wifi = "${ic "e1ae"}  {essid}";
+        format-wifi = "${icLow "e1ae"}  {essid}";
         format-ethernet = ic "e620";
         format-disconnected = ic "e1af";
         tooltip-format-wifi = "{essid} ({signalStrength}%)";
