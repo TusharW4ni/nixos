@@ -103,101 +103,76 @@ in
   ];
 
   # Lock screen, styled like the tuigreet login: black, monospace, the date
-  # on top, an 80-column box with a thin grey border holding bold
-  # "Username:" / "Password:" rows, and a key-hint bar bottom-left.
+  # on top, a box with a thin grey border holding bold "Username:" /
+  # "Password:" rows, and a key-hint bar bottom-left. Positions are
+  # hand-tuned against the real greeter, not derived.
   programs.hyprlock = {
     enable = true;
     settings =
       let
-        # Mimic the Linux console grid tuigreet draws on: 8x16 px cells.
-        # font_size is in points (px = pt * 4/3); JetBrains Mono's advance is
-        # 0.6 em, so 10pt gives 8px-wide cells.
-        mono = "JetBrains Mono";
-        size = 10;
-        cw = 0.6 * size * 4 / 3;
-        lh = 16;
         grey = "rgb(5c5c5c)";
         white = "rgb(e6e6e6)";
-        # tuigreet's box: 80 columns, the border running through the middle of
-        # the first/last cell, one blank row above and below the prompts.
-        box = { w = 79 * cw; h = 5 * lh; };
-        left = -box.w / 2 + 1.5 * cw; # prompts start in column 2
-        px = n: toString (builtins.floor n);
-        # A row of `chars` visible characters whose left edge is at `left`.
-        row = markup: chars: y: {
+        text = {
           monitor = "";
-          text = markup;
-          color = white;
-          font_size = size;
-          font_family = mono;
-          position = "${px (left + chars * cw / 2)}, ${toString y}";
-          halign = "center";
-          valign = "center";
+          font_family = "JetBrains Mono";
+          font_size = 14;
         };
         # "##" is a literal "#" in hyprlang ("#" starts a comment).
         key = k: "<span background='##e6e6e6' foreground='##000000'>${k}</span>";
+        # The password field and the black strip under it.
+        field = { size = "336, 22"; position = "-52, -12"; };
       in
       {
         general.hide_cursor = true;
         background = [{ monitor = ""; color = "rgb(000000)"; }];
-        shape = [{
+        shape = map (s: {
           monitor = "";
-          size = "${px box.w}, ${px box.h}";
           color = "rgb(000000)";
           rounding = 0;
-          border_size = 1;
-          border_color = grey;
           zindex = -1; # under the text
-          position = "0, 0";
           halign = "center";
           valign = "center";
-        }];
-        label = [
+        } // s) [
+          { size = "672, 117"; position = "0, 0"; border_size = 1; border_color = grey; }
+          (field // { border_size = 0; border_color = grey; })
+        ];
+        label = map (l: text // l) [
           {
-            monitor = "";
             text = ''cmd[update:1000] date '+%a, %d %b %Y - %H:%M' '';
             color = grey;
-            font_size = size;
-            font_family = mono;
-            position = "0, -15";
+            position = "0, -16";
             halign = "center";
             valign = "top";
           }
-          (row "<b>Username:</b> tushar" 16 (lh / 2))
-          (row "<b>Password:</b>" 9 (-lh / 2))
+          { text = "<b>Username:</b> tushar"; color = white; position = "-242, 12"; halign = "center"; valign = "center"; }
+          { text = "<b>Password:</b>"; color = white; position = "-282, -12"; halign = "center"; valign = "center"; }
           {
-            monitor = "";
             text = "${key "ESC"} Clear ${key "ENTER"} Unlock";
             color = grey;
-            font_size = size;
-            font_family = mono;
-            position = "8, 0";
+            position = "12, 10";
             halign = "left";
             valign = "bottom";
           }
         ];
-        input-field = [{
+        input-field = [(field // {
           monitor = "";
-          size = "${px (40 * cw)}, ${toString lh}";
           outline_thickness = 0;
           rounding = 0;
-          inner_color = "rgb(000000)";
+          inner_color = "rgba(00000000)";
           font_color = white;
           check_color = "rgb(000000)";
           fail_color = "rgb(000000)";
-          font_family = mono;
+          font_family = "JetBrains Mono";
           dots_text_format = "*";
-          dots_size = 0.9;
+          dots_size = 0.5;
           dots_spacing = 0.1;
           dots_center = false;
           placeholder_text = "";
           fail_text = ''<span foreground="##ff8080">wrong password</span>'';
           fade_on_empty = false;
-          # Starts right after "Password: " (10 cells); 40 cells wide.
-          position = "${px (left + 10 * cw + 20 * cw)}, ${toString (-lh / 2)}";
           halign = "center";
           valign = "center";
-        }];
+        })];
       };
   };
 
