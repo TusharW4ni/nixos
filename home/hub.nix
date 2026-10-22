@@ -104,7 +104,8 @@ in
 
   # Lock screen, styled like the tuigreet login: black, monospace, bold
   # "Username:" / "Password:" rows, and the top bar's clock where the bar
-  # would be. Positions are hand-tuned against the real greeter.
+  # would be. Positions are hand-tuned; the rows are centred on the
+  # "Username: tushar" line.
   programs.hyprlock = {
     enable = true;
     settings =
@@ -132,13 +133,13 @@ in
             halign = "center";
             valign = "top";
           }
-          { text = "<b>Username:</b> tushar"; color = white; position = "-242, 12"; halign = "center"; valign = "center"; }
-          { text = "<b>Password:</b>"; color = white; position = "-282, -12"; halign = "center"; valign = "center"; }
+          { text = "<b>Username:</b> tushar"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
+          { text = "<b>Password:</b>"; color = white; position = "-40, -12"; halign = "center"; valign = "center"; }
         ];
         input-field = [{
           monitor = "";
           size = "336, 22";
-          position = "-52, -12";
+          position = "190, -12";
           outline_thickness = 0;
           rounding = 0;
           inner_color = "rgba(00000000)";
