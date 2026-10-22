@@ -34,7 +34,11 @@ in
         options = { # vfs-cache-mode=full and cache-dir come from the module
           dir-cache-time = "1000h";   # safe: Drive change polling invalidates entries
           poll-interval = "15s";      # changes made on the web show up within ~15s
-          vfs-cache-max-age = "720h"; # keep opened files ~30 days
+          # Opened files are cached locally and evicted automatically once
+          # they have not been accessed for 90 days (or when the cache passes
+          # 10G, oldest first). Eviction only frees local disk; Drive keeps
+          # the file.
+          vfs-cache-max-age = "2160h";
           vfs-cache-max-size = "10G";
           vfs-cache-min-free-space = "20G";
         };
