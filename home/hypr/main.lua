@@ -47,6 +47,9 @@ hl.config({
     },
   },
   decoration = { rounding = 6 },
+  -- Capitaine is an XCursor theme; with hyprcursor on, Hyprland falls back
+  -- to its own default cursor instead.
+  cursor = { enable_hyprcursor = false },
   misc = {
     background_color = 0xff000000,
     disable_hyprland_logo = true,
