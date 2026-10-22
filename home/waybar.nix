@@ -22,6 +22,13 @@ in
 
   programs.waybar = {
     enable = true;
+    # Waybar 0.15.0 sends old-style "dispatch workspace N", which Hyprland's
+    # Lua config rejects, so clicking a workspace does nothing. Upstream fix:
+    # Alexays/Waybar#5013 (merged after 0.15.0), minus its scroll and test
+    # hunks that do not apply to 0.15.0. Drop once waybar > 0.15.0.
+    package = pkgs.waybar.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ../pkgs/waybar-lua-dispatch.patch ];
+    });
     systemd.enable = true;
     settings.mainBar = {
       layer = "top";

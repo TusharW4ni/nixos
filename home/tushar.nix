@@ -201,6 +201,7 @@ in
     c = "claude --permission-mode auto";
     cw = "claude --permission-mode auto --worktree";
     ponder = "~/.claude/skills/ponder/scripts/ponder.sh";
+    yazi = "y"; # the y wrapper cds into yazi's last directory on exit
   };
 
   # claude-sync integration: keep sessions synced with the R2 remote.
