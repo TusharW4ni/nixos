@@ -103,10 +103,9 @@ in
   ];
 
   # Lock screen: black, the top bar's clock where the bar would be, and
-  # "tushar" centred with a blinking "_" under it. hyprlock has no text
-  # caret, so the "_" is a label; the password field sits on top of it with
-  # an opaque background and fades out while empty, so you see the cursor
-  # until you type and the dots after.
+  # "tushar" centred with a blinking "_" under it. Typing echoes nothing:
+  # hyprlock's hide_input draws a thin frame around the "_" and lights a
+  # random corner of it on every keystroke. The frame fades out while empty.
   programs.hyprlock = {
     enable = true;
     settings =
@@ -144,24 +143,26 @@ in
             valign = "center";
             zindex = -1; # under the password field
           }
+          # The field is faded out after a failed attempt (it's empty), so
+          # the failure gets its own label.
+          { text = ''<span foreground="##ff8080">$FAIL</span>''; color = white; position = "0, -44"; halign = "center"; valign = "center"; }
         ];
         input-field = [{
           monitor = "";
-          size = "336, 22";
+          size = "28, 28"; # a small square around the "_"
           position = "0, -12";
-          outline_thickness = 0;
           rounding = 0;
-          inner_color = "rgb(000000)"; # opaque: hides the cursor while typing
-          font_color = white;
-          check_color = "rgb(000000)";
+          outline_thickness = 1;
+          outer_color = "rgb(262626)";
+          hide_input = true;
+          # Lit corner colour. Grey has no hue, so the random hue rotation
+          # keeps it grey; give it a colour for random-colour flicks.
+          hide_input_base_color = "rgb(e6e6e6)";
+          check_color = "rgb(5c5c5c)"; # frame while PAM checks
           fail_color = "rgb(000000)";
-          font_family = "JetBrains Mono";
-          dots_text_format = "*";
-          dots_size = 0.5;
-          dots_spacing = 0.1;
-          dots_center = true;
+          inner_color = "rgba(00000000)"; # see-through: the "_" stays visible
           placeholder_text = "";
-          fail_text = ''<span foreground="##ff8080">wrong password</span>'';
+          fail_text = "";
           fade_on_empty = true;
           fade_timeout = 0;
           halign = "center";
