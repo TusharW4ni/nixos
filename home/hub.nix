@@ -102,10 +102,11 @@ in
     "f %h/.local/state/hypridle/overrides.conf - - - -"
   ];
 
-  # Lock screen, styled like the tuigreet login: black, monospace, bold
-  # "Username:" / "Password:" rows, and the top bar's clock where the bar
-  # would be. Positions are hand-tuned; the rows are centred on the
-  # "Username: tushar" line.
+  # Lock screen: black, the top bar's clock where the bar would be, and
+  # "tushar" centred with a blinking "_" under it. hyprlock has no text
+  # caret, so the "_" is a label; the password field sits on top of it with
+  # an opaque background and fades out while empty, so you see the cursor
+  # until you type and the dots after.
   programs.hyprlock = {
     enable = true;
     settings =
@@ -133,16 +134,24 @@ in
             halign = "center";
             valign = "top";
           }
-          { text = "<b>Username:</b> tushar"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
-          { text = "<b>Password:</b>"; color = white; position = "-40, -12"; halign = "center"; valign = "center"; }
+          { text = "tushar"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
+          # On for the first half of each second, off for the second half.
+          {
+            text = "cmd[update:250] date +%N | grep -q '^[0-4]' && echo _ || echo ' '";
+            color = white;
+            position = "0, -12";
+            halign = "center";
+            valign = "center";
+            zindex = -1; # under the password field
+          }
         ];
         input-field = [{
           monitor = "";
           size = "336, 22";
-          position = "190, -12";
+          position = "0, -12";
           outline_thickness = 0;
           rounding = 0;
-          inner_color = "rgba(00000000)";
+          inner_color = "rgb(000000)"; # opaque: hides the cursor while typing
           font_color = white;
           check_color = "rgb(000000)";
           fail_color = "rgb(000000)";
@@ -150,10 +159,11 @@ in
           dots_text_format = "*";
           dots_size = 0.5;
           dots_spacing = 0.1;
-          dots_center = false;
+          dots_center = true;
           placeholder_text = "";
           fail_text = ''<span foreground="##ff8080">wrong password</span>'';
-          fade_on_empty = false;
+          fade_on_empty = true;
+          fade_timeout = 0;
           halign = "center";
           valign = "center";
         }];
