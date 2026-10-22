@@ -14,6 +14,7 @@
     ../../modules/system/nix-ld.nix
     ../../modules/desktop/session.nix
     ../../modules/desktop/fonts.nix
+    ../../modules/desktop/gdrive.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/desktop/steam.nix
   ];

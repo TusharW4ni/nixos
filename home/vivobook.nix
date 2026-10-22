@@ -8,6 +8,7 @@
     ./vicinae.nix
     ./hub.nix
     ./yazi.nix
+    ./rclone.nix
   ];
 
   # Polkit password prompts (none ran under Hyprland before).
