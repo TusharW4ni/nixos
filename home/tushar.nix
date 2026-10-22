@@ -138,6 +138,9 @@ in
       };
     };
   };
+  # Route vim.ui.select (treechat's chat/model/thinking pickers, LSP code
+  # actions, ...) through telescope instead of the cmdline list.
+  programs.nixvim.plugins.telescope.extensions.ui-select.enable = true;
   programs.nixvim.extraConfigLua = ''
     local treechat_dir = vim.fn.expand("~/p/treechat.nvim")
     if vim.fn.isdirectory(treechat_dir) == 1 then

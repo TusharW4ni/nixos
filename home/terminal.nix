@@ -17,6 +17,9 @@
       window-padding-balance = true;
       window-padding-color = "background";
       confirm-close-surface = false;
+      # Ghostty's default ctrl+enter is toggle_fullscreen; hand the key to the
+      # app instead (Claude Code, nvim). Hyprland does fullscreen.
+      keybind = [ "ctrl+enter=unbind" ];
     };
   };
 }
