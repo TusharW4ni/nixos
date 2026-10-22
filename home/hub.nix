@@ -7,10 +7,14 @@ let
   idle = { lock = 300; off = 330; suspend = 1800; };
   sunset = { start = "20:30"; end = "07:00"; kelvin = 4000; };
 
-  # hyprmon writes the monitor layout to ~/.config/hypr/hyprmon.lua, which
-  # hypr/main.lua loads.
+  # hyprmon saves by writing hyprmon.lua next to the config it's given and
+  # adding a require() to that config. The real hyprland.lua is a read-only
+  # Nix symlink, so give it a writable stub in ~/.local/state/hyprmon; the
+  # layout lands in ~/.local/state/hyprmon/hyprmon.lua, which hypr/main.lua loads.
   hyprmon = pkgs.writeShellScriptBin "hyprmon" ''
-    export HYPRLAND_CONFIG=$HOME/.config/hypr/hyprland.lua
+    dir=''${XDG_STATE_HOME:-$HOME/.local/state}/hyprmon
+    mkdir -p "$dir"
+    export HYPRLAND_CONFIG=$dir/hyprland.lua
     exec ${pkgs.hyprmon}/bin/hyprmon "$@"
   '';
 

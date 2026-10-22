@@ -17,11 +17,11 @@ local run = hl.dsp.exec_cmd
 ------------------------------------------------------------------------------
 -- Monitors
 ------------------------------------------------------------------------------
--- Every monitor at its preferred mode. The layout editor (hyprmon) writes
--- per-output overrides to ~/.config/hypr/hyprmon.lua, a mutable file outside
--- the repo; it's optional, hence pcall.
+-- Every monitor at its preferred mode. The layout editor (hyprmon, hub >
+-- displays) writes per-output overrides to ~/.local/state/hyprmon/hyprmon.lua,
+-- a mutable file outside the repo; it's optional, hence pcall.
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
-pcall(dofile, home .. "/.config/hypr/hyprmon.lua")
+pcall(dofile, home .. "/.local/state/hyprmon/hyprmon.lua")
 
 ------------------------------------------------------------------------------
 -- Look and input

@@ -30,7 +30,7 @@ case "${1:-toggle}" in
     if active; then
       n=$(makoctl list -j | jq length)
       jq -nc --arg n "$n" \
-        '{text: "<span font_family=\"lucide\">&#xe05a;</span>  \($n)", class: "on", tooltip: "do not disturb · \($n) hidden"}'
+        '{text: ("<span font_family=\"lucide\">&#xe05a;</span>" + (if $n == "0" then "" else "  \($n)" end)), class: "on", tooltip: "do not disturb · \($n) hidden"}'
     else
       echo '{"text": ""}'
     fi
