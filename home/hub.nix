@@ -103,9 +103,8 @@ in
   ];
 
   # Lock screen, styled like the tuigreet login: black, monospace, the date
-  # on top, a box with a thin grey border holding bold "Username:" /
-  # "Password:" rows, and a key-hint bar bottom-left. Positions are
-  # hand-tuned against the real greeter, not derived.
+  # on top, bold "Username:" / "Password:" rows, and a key-hint bar
+  # bottom-left. Positions are hand-tuned against the real greeter.
   programs.hyprlock = {
     enable = true;
     settings =
@@ -119,23 +118,10 @@ in
         };
         # "##" is a literal "#" in hyprlang ("#" starts a comment).
         key = k: "<span background='##e6e6e6' foreground='##000000'>${k}</span>";
-        # The password field and the black strip under it.
-        field = { size = "336, 22"; position = "-52, -12"; };
       in
       {
         general.hide_cursor = true;
         background = [{ monitor = ""; color = "rgb(000000)"; }];
-        shape = map (s: {
-          monitor = "";
-          color = "rgb(000000)";
-          rounding = 0;
-          zindex = -1; # under the text
-          halign = "center";
-          valign = "center";
-        } // s) [
-          { size = "672, 117"; position = "0, 0"; border_size = 1; border_color = grey; }
-          (field // { border_size = 0; border_color = grey; })
-        ];
         label = map (l: text // l) [
           {
             text = ''cmd[update:1000] date '+%a, %d %b %Y - %H:%M' '';
@@ -154,8 +140,10 @@ in
             valign = "bottom";
           }
         ];
-        input-field = [(field // {
+        input-field = [{
           monitor = "";
+          size = "336, 22";
+          position = "-52, -12";
           outline_thickness = 0;
           rounding = 0;
           inner_color = "rgba(00000000)";
@@ -172,7 +160,7 @@ in
           fade_on_empty = false;
           halign = "center";
           valign = "center";
-        })];
+        }];
       };
   };
 
