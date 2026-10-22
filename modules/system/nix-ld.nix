@@ -16,9 +16,9 @@
       cups dbus expat glib
       gtk3 pango cairo gdk-pixbuf
       alsa-lib mesa libGL libdrm libgbm
-      xorg.libX11 xorg.libxcb xorg.libXcomposite xorg.libXdamage
-      xorg.libXext xorg.libXfixes xorg.libXrandr xorg.libXrender
-      xorg.libXtst xorg.libxshmfence libxkbcommon
+      libx11 libxcb libxcomposite libxdamage
+      libxext libxfixes libxrandr libxrender
+      libxtst libxshmfence libxkbcommon
     ];
   };
 }

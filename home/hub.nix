@@ -102,43 +102,38 @@ in
     "f %h/.local/state/hypridle/overrides.conf - - - -"
   ];
 
-  # Lock screen, styled like the tuigreet login: black, monospace, the date
-  # on top, bold "Username:" / "Password:" rows, and a key-hint bar
-  # bottom-left. Positions are hand-tuned against the real greeter.
+  # Lock screen, styled like the tuigreet login: black, monospace, bold
+  # "Username:" / "Password:" rows, and the top bar's clock where the bar
+  # would be. Positions are hand-tuned against the real greeter.
   programs.hyprlock = {
     enable = true;
     settings =
       let
-        grey = "rgb(5c5c5c)";
         white = "rgb(e6e6e6)";
         text = {
           monitor = "";
           font_family = "JetBrains Mono";
           font_size = 14;
         };
-        # "##" is a literal "#" in hyprlang ("#" starts a comment).
-        key = k: "<span background='##e6e6e6' foreground='##000000'>${k}</span>";
       in
       {
         general.hide_cursor = true;
         background = [{ monitor = ""; color = "rgb(000000)"; }];
         label = map (l: text // l) [
+          # Same as waybar's custom/clock (home/waybar.nix): format, font,
+          # tabular digits, centred in the 34px bar. font_size is in points:
+          # 11pt ~ the bar's 15px.
           {
-            text = ''cmd[update:1000] date '+%a, %d %b %Y - %H:%M' '';
-            color = grey;
-            position = "0, -16";
+            text = ''cmd[update:1000] date "+<span font_features='tnum'>%a %m/%d · %H:%M:%S</span>"'';
+            color = white;
+            font_family = "Atkinson Hyperlegible Next";
+            font_size = 11;
+            position = "0, -8";
             halign = "center";
             valign = "top";
           }
           { text = "<b>Username:</b> tushar"; color = white; position = "-242, 12"; halign = "center"; valign = "center"; }
           { text = "<b>Password:</b>"; color = white; position = "-282, -12"; halign = "center"; valign = "center"; }
-          {
-            text = "${key "ESC"} Clear ${key "ENTER"} Unlock";
-            color = grey;
-            position = "12, 10";
-            halign = "left";
-            valign = "bottom";
-          }
         ];
         input-field = [{
           monitor = "";
