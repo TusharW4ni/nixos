@@ -5,7 +5,7 @@
 #
 # Runtime state (everything else is Nix):
 #   ~/.local/state/hypridle/overrides.conf   auto-lock timeouts, `source`d by hypridle
-#   ~/.local/state/hypridle/off              flag: auto-lock disabled
+#   ~/.local/state/hypridle/off              flag: auto-lock disabled (idle inhibitor, see hub.nix)
 #   ~/.local/state/hyprsunset/settings       night light choices
 #   ~/.local/state/hyprsunset/hypr/hyprsunset.conf  generated from them
 
@@ -43,10 +43,10 @@ autolock() {
         fi ;;
       "turn auto-lock off")
         mkdir -p "$state/hypridle"; touch "$state/hypridle/off"
-        systemctl --user stop hypridle ;;
+        systemctl --user start autolock-off ;;
       "turn auto-lock on")
         rm -f "$state/hypridle/off"
-        systemctl --user start hypridle ;;
+        systemctl --user stop autolock-off ;;
       caffeine*)
         setsid -f systemd-inhibit --what=idle --who=hub --why=caffeine sleep 3600
         oops "staying awake for 1 hour" ;;

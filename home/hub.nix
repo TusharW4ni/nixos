@@ -101,8 +101,19 @@ in
       ];
     };
   };
-  # "turn auto-lock off" in the hub: a flag file keeps hypridle off across logins.
-  systemd.user.services.hypridle.Unit.ConditionPathExists = "!%h/.local/state/hypridle/off";
+  # "turn auto-lock off" in the hub. hypridle keeps running (it is also what
+  # locks on `loginctl lock-session` and before sleep); instead an idle
+  # inhibitor blocks the idle timers while the flag file exists, across logins.
+  systemd.user.services.autolock-off = {
+    Unit = {
+      Description = "Auto-lock disabled (idle inhibitor)";
+      ConditionPathExists = "%h/.local/state/hypridle/off";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service.ExecStart = "${pkgs.systemd}/bin/systemd-inhibit --what=idle --who=hub --why=auto-lock-off ${pkgs.coreutils}/bin/sleep infinity";
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
   systemd.user.tmpfiles.rules = [
     "d %h/.local/state/hypridle - - - -"
     "f %h/.local/state/hypridle/overrides.conf - - - -"
