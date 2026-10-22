@@ -1,15 +1,16 @@
 # Pure helpers for the settings hub. No side effects at load time, so
 # tests/hub-test.sh can source this file directly.
 
-# valid_seconds <v>: an integer >= 30. hypridle silently drops a listener
-# whose timeout isn't an integer, so bad input must never reach the file.
-valid_seconds() { [[ ${1:-} =~ ^[0-9]+$ ]] && (( 10#$1 >= 30 )); }
+# valid_seconds <v>: an integer >= 30, at most 6 digits (bash arithmetic
+# wraps on overflow). hypridle silently drops a listener whose timeout isn't
+# an integer, so bad input must never reach the file.
+valid_seconds() { [[ ${1:-} =~ ^[0-9]{1,6}$ ]] && (( 10#$1 >= 30 )); }
 
 # valid_hhmm <v>: 24h HH:MM with a leading zero.
 valid_hhmm() { [[ ${1:-} =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; }
 
-# valid_kelvin <v>: an integer in 1000..6500.
-valid_kelvin() { [[ ${1:-} =~ ^[0-9]+$ ]] && (( 10#$1 >= 1000 && 10#$1 <= 6500 )); }
+# valid_kelvin <v>: an integer in 1000..6500 (4 digits).
+valid_kelvin() { [[ ${1:-} =~ ^[0-9]{4}$ ]] && (( 10#$1 >= 1000 && 10#$1 <= 6500 )); }
 
 # kv_get <file> <key> <default>: value of the last "$key = v" line, else default.
 kv_get() {

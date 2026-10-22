@@ -10,6 +10,8 @@ nok() { ! "$@" || { echo "FAIL (accepted): $*"; exit 1; }; }
 ok valid_seconds 30;  nok valid_seconds 29; nok valid_seconds abc; nok valid_seconds ""
 ok valid_hhmm 20:30;  ok valid_hhmm 07:00;  nok valid_hhmm 25:00; nok valid_hhmm 7:00; nok valid_hhmm 20:60
 ok valid_kelvin 4000; nok valid_kelvin 999; nok valid_kelvin 6501; nok valid_kelvin 4k
+# Overflow: bash arithmetic wraps, so absurdly long numbers must be rejected by length.
+nok valid_seconds 99999999999999999999; nok valid_kelvin 18446744073709555000
 
 f=$(mktemp); trap 'rm -f "$f"' EXIT
 [ "$(kv_get "$f" lock 300)" = 300 ]               || { echo "FAIL: default"; exit 1; }
