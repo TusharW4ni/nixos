@@ -1,7 +1,7 @@
 # Status bar: pure black, Atkinson Hyperlegible Next, thin Lucide line icons.
 # Approved look: docs/superpowers/specs/2026-10-19-hyprland-polish-research/bar-mockup.html (variant C).
-# Signals: 8 = DND (dnd toggle refreshes it), 9 = mic.
-{ pkgs, ... }:
+# Signals: 8 = DND (dnd toggle refreshes it), 9 = mic, 10 = service icons.
+{ pkgs, config, ... }:
 let
   # Lucide maps letters and digits to icons too, so it's only ever used
   # inside a span, never in the font-family list. Codepoints: lucide 0.563.0.
@@ -16,9 +16,27 @@ let
     runtimeInputs = with pkgs; [ pipewire wireplumber jq procps gnugrep ];
     text = builtins.readFile ./scripts/mic.sh;
   };
+
+  svc = pkgs.writeShellApplication {
+    name = "svc";
+    runtimeInputs = with pkgs; [ systemd tailscale docker jq gawk gnugrep gnused curl coreutils ];
+    text = ''
+      SYNCTHING_CONFIG=${config.home.homeDirectory}/Sync/.config/syncthing/config.xml # dataDir in modules/system/syncthing.nix
+    '' + builtins.readFile ./scripts/svc.sh;
+  };
+  # One icon per background service: dim while up, red while down, amber
+  # while syncthing is syncing. Click opens its hub section; the hub
+  # refreshes them with signal 10.
+  service = name: {
+    exec = "svc ${name}";
+    return-type = "json";
+    interval = 5;
+    signal = 10;
+    on-click = "hub ${name}";
+  };
 in
 {
-  home.packages = [ mic pkgs.brightnessctl ];
+  home.packages = [ mic svc pkgs.brightnessctl ];
 
   programs.waybar = {
     enable = true;
@@ -37,6 +55,10 @@ in
       modules-left = [ "hyprland/workspaces" ];
       modules-center = [ "custom/clock" ];
       modules-right = [
+        "custom/tailscale"
+        "custom/syncthing"
+        "custom/docker"
+        "custom/gdrive"
         "custom/recording"
         "custom/dnd"
         "custom/mic"
@@ -53,6 +75,10 @@ in
         interval = 1;
         tooltip = false;
       };
+      "custom/tailscale" = service "tailscale";
+      "custom/syncthing" = service "syncthing";
+      "custom/docker" = service "docker";
+      "custom/gdrive" = service "gdrive";
       # "● REC 0:42" while recording, hidden otherwise. Click to stop.
       "custom/recording" = {
         exec = "screenrec status";
@@ -154,19 +180,25 @@ in
       }
       #custom-recording,
       #custom-mic.live,
+      #custom-tailscale.down, #custom-syncthing.down,
+      #custom-docker.down, #custom-gdrive.down,
       #battery.critical:not(.charging) {
         color: #ff8080;
       }
       #custom-dnd,
+      #custom-syncthing.syncing,
       #battery.warning:not(.charging) {
         color: #f5a524;
       }
       #custom-mic.idle,
       #custom-mic.muted,
+      #custom-tailscale.up, #custom-syncthing.up,
+      #custom-docker.up, #custom-gdrive.up,
       #pulseaudio.muted,
       #network.disconnected {
         color: #5c5c5c;
       }
+      #custom-tailscale, #custom-syncthing, #custom-docker, #custom-gdrive,
       #custom-recording, #custom-dnd, #custom-mic, #backlight,
       #pulseaudio, #bluetooth, #network, #battery {
         padding: 0 9px;

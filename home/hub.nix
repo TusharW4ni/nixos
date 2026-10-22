@@ -24,8 +24,10 @@ let
     runtimeInputs = with pkgs; [
       gum fzf jq gnused coreutils util-linux brightnessctl
       wifitui bluetui wiremix systemd-manager-tui hyprmon
+      curl tailscale lazydocker wl-clipboard procps
     ];
     text = ''
+      SYNCTHING_CONFIG=${config.home.homeDirectory}/Sync/.config/syncthing/config.xml # dataDir in modules/system/syncthing.nix
       IDLE_LOCK=${toString idle.lock}
       IDLE_OFF=${toString idle.off}
       IDLE_SUSPEND=${toString idle.suspend}

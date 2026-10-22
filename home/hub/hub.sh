@@ -15,6 +15,7 @@ sunset=$state/hyprsunset
 
 pick() { gum choose --header "$1" "${@:2}"; } # Esc -> non-zero -> caller returns
 oops() { gum style --foreground 9 "$1"; sleep 1.2; }
+fzf_colors='bg:#000000,bg+:#1c1c1c,fg:#a0a0a0,fg+:#ffffff,hl:#f5a524,hl+:#f5a524,prompt:#e6e6e6,pointer:#e6e6e6,border:#262626'
 
 # ---------------------------------------------------------------- auto-lock
 autolock() {
@@ -131,8 +132,89 @@ keys() {
         printf '%-26s %s\n' "$combo" "$desc"
       done \
     | sort -u \
-    | fzf --no-sort --layout=reverse --prompt 'keys > ' --color 'bg:#000000,bg+:#1c1c1c,fg:#a0a0a0,fg+:#ffffff,hl:#f5a524,hl+:#f5a524,prompt:#e6e6e6,pointer:#e6e6e6,border:#262626' >/dev/null
+    | fzf --no-sort --layout=reverse --prompt 'keys > ' --color "$fzf_colors" >/dev/null
 }
+
+# ---------------------------------------------------------------- tailscale
+tailscale_menu() {
+  local c st state ip peer
+  while :; do
+    st=$(tailscale status --json 2>/dev/null) || st='{}'
+    state=$(jq -r '.BackendState // "Stopped"' <<<"$st")
+    ip=$(jq -r '.TailscaleIPs[0] // empty' <<<"$st")
+    c=$(pick "tailscale: ${state,,}${ip:+ · $ip}" \
+      "turn $([[ $state == Running ]] && echo off || echo on)" \
+      "peers" \
+      "copy my ip" \
+      "admin console") || return
+    case $c in
+      "turn off") tailscale down ;;
+      "turn on") tailscale up || oops "tailscale up failed" ;; # prints a login URL if needed
+      peers)
+        peer=$(tailscale status | fzf --no-sort --layout=reverse --prompt 'peers (enter copies ip) > ' --color "$fzf_colors") \
+          && wl-copy -n "${peer%% *}" ;;
+      "copy my ip") wl-copy -n "$ip" ;;
+      admin*) xdg-open https://login.tailscale.com/admin/machines >/dev/null 2>&1 ;;
+    esac
+    refresh
+  done
+}
+
+# ---------------------------------------------------------------- syncthing
+# REST API on the local GUI port; the API key lives in Syncthing's config.
+st_api() {
+  local key
+  key=$(sed -n 's:.*<apikey>\(.*\)</apikey>.*:\1:p' "$SYNCTHING_CONFIG" 2>/dev/null)
+  curl -sf -H "X-API-Key: $key" "http://127.0.0.1:8384/rest/$1" "${@:2}"
+}
+
+syncthing_status() {
+  local conns id label
+  conns=$(st_api system/connections) || { echo "syncthing is not responding"; return; }
+  echo "devices"
+  st_api config/devices | jq -r --argjson c "$conns" \
+    '.[] | select($c.connections[.deviceID]) | "  \(.name)\t\(if $c.connections[.deviceID].connected then "connected" else "offline" end)"'
+  echo; echo "folders"
+  st_api config/folders | jq -r '.[] | "\(.id)\t\(if .label == "" then .id else .label end)"' \
+    | while IFS=$'\t' read -r id label; do
+        st_api "db/status?folder=$id" | jq -r --arg l "$label" \
+          '"  \($l)\t\(.state)\(if .needFiles > 0 then " · \(.needFiles) files to sync" else "" end)"'
+      done
+}
+
+syncthing_menu() {
+  local c n
+  while :; do
+    n=$(st_api system/connections | jq '[.connections[] | select(.connected)] | length') || n=
+    c=$(pick "syncthing: ${n:+$n devices connected}${n:-not responding}" \
+      "status" "rescan all" "open web ui" "restart") || return
+    case $c in
+      status) syncthing_status | column -t -s $'\t' | gum pager ;;
+      "rescan all") st_api db/scan -X POST >/dev/null || oops "syncthing is not responding" ;;
+      "open web ui") xdg-open http://127.0.0.1:8384 >/dev/null 2>&1 ;;
+      restart) st_api system/restart -X POST >/dev/null || oops "syncthing is not responding" ;;
+    esac
+    refresh
+  done
+}
+
+# ------------------------------------------------------------------- gdrive
+gdrive_menu() {
+  local c states
+  while :; do
+    states=$(systemctl --user list-units --all --plain --no-legend 'rclone-mount:@*' \
+      | awk '{sub(/^rclone-mount:@/, "", $1); sub(/\.service$/, "", $1); printf "%s %s  ", $1, $3}')
+    c=$(pick "gdrive: ${states:-no mounts}" "open in yazi" "restart mounts") || return
+    case $c in
+      open*) yazi "$HOME/gdrive" ;;
+      restart*) systemctl --user restart 'rclone-mount:@*' || oops "restart failed" ;;
+    esac
+    refresh
+  done
+}
+
+# Redraw the bar's service icons (home/waybar.nix, signal 10).
+refresh() { pkill -RTMIN+10 waybar || true; }
 
 # --------------------------------------------------------------- dispatcher
 run() {
@@ -149,14 +231,23 @@ run() {
     power) power ;;
     keys) keys ;;
     services) systemd-manager-tui ;;
+    tailscale) tailscale_menu ;;
+    syncthing) syncthing_menu ;;
+    docker) lazydocker; refresh ;;
+    gdrive) gdrive_menu ;;
     *) oops "unknown section: $1"; return 1 ;;
   esac
 }
 
+# Launched without a terminal (a waybar click): reopen in the hub window.
+if [[ ! -t 0 ]]; then
+  exec setsid -f ghostty --class=dev.tushar.hub -e hub "$@"
+fi
 if [[ $# -gt 0 ]]; then
   run "$1"
   exit
 fi
-while c=$(pick "hub" wifi bluetooth audio displays brightness nightlight autolock power keys services); do
+while c=$(pick "hub" wifi bluetooth audio displays brightness nightlight autolock power keys services \
+  tailscale syncthing docker gdrive); do
   run "$c"
 done
