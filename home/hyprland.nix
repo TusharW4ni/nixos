@@ -44,6 +44,17 @@ in {
   # Screenshots save to ~/ss/pics, recordings to ~/ss/vids. Create both up front so satty can save.
   systemd.user.tmpfiles.rules = [ "d %h/ss/pics - - - -" "d %h/ss/vids - - - -" ];
 
+  # Cursor: Capitaine (white), an XCursor theme. GTK/X11 apps read these
+  # settings; Hyprland itself gets XCURSOR_* from hypr/main.lua.
+  home.pointerCursor = {
+    enable = true;
+    package = pkgs.capitaine-cursors;
+    name = "capitaine-cursors-white";
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+  };
+
   # Hyprland window manager config, written in Lua (hyprlang is deprecated
   # and removed in 0.57). The config itself lives in ./hypr/main.lua.
   wayland.windowManager.hyprland = {

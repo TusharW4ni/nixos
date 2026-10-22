@@ -27,6 +27,8 @@ pcall(dofile, home .. "/.config/hypr/hyprmon.lua")
 -- Look and input
 ------------------------------------------------------------------------------
 hl.env("NIXOS_OZONE_WL", "1")
+hl.env("XCURSOR_THEME", "capitaine-cursors-white") -- matches home.pointerCursor
+hl.env("XCURSOR_SIZE", "24")
 
 hl.config({
   input = {
