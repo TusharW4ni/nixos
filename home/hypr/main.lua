@@ -62,9 +62,8 @@ hl.layer_rule({ name = "vicinae-no-anim", match = { namespace = "vicinae" }, no_
 ------------------------------------------------------------------------------
 -- Autostart
 ------------------------------------------------------------------------------
-hl.on("hyprland.start", function()
-  hl.exec_cmd("dnd watch") -- keeps Slack/Discord muted while DND is on
-end)
+-- Session services (bar, notifications, DND watcher, ...) are systemd user
+-- units started with graphical-session.target; nothing to start here.
 
 ------------------------------------------------------------------------------
 -- Binds

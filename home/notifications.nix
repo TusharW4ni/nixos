@@ -39,6 +39,22 @@ in
     };
   };
 
+  # Keeps Slack/Discord streams muted while DND is on. Supervised, so it
+  # comes back if pipewire-pulse restarts (`pactl subscribe` exits with it).
+  systemd.user.services.dnd-watch = {
+    Unit = {
+      Description = "Mute Slack/Discord sounds while DND is on";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" "pipewire-pulse.service" ];
+    };
+    Service = {
+      ExecStart = "${dnd}/bin/dnd watch";
+      Restart = "always";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   # Media keys act on the most recently active player.
   services.playerctld.enable = true;
 
