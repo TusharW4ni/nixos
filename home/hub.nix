@@ -103,16 +103,35 @@ in
   ];
 
   # Lock screen: black, the top bar's clock where the bar would be, and
-  # "tushar" centred with a blinking "_" under it. Typing echoes nothing:
-  # hyprlock's hide_input draws a thin frame around the "_" and lights a
-  # random corner of it on every keystroke. The frame fades out while empty.
-  # Fades and colour changes are eased; the corner flick itself can't be
-  # animated (hyprlock swaps it instantly).
+  # "tushar" centred, looping through a matrix-style decode/re-encode.
+  # Typing echoes nothing: the password field is a small ring under the name,
+  # and hyprlock's hide_input lights a random quarter of it on every
+  # keystroke, so it ticks like a spinner while you type and fades out when
+  # empty. (Labels can't see keystrokes, so the field is the only thing that
+  # can react to typing.)
   programs.hyprlock = {
     enable = true;
     settings =
       let
         white = "rgb(e6e6e6)";
+        # 6.5s loop: random glyphs settle into "tushar" left to right (1.2s),
+        # hold, scramble back right to left (1.2s), stay scrambled briefly.
+        # Unsettled glyphs are grey. Run every 100ms by the label below.
+        scramble = pkgs.writeShellScript "hyprlock-scramble" ''
+          name=tushar
+          glyphs='abcdefghijklmnopqrstuvwxyz0123456789#%*+=?/'
+          n=''${#name}
+          t=''${EPOCHREALTIME/[.,]/}
+          ms=$(( t / 1000 % 6500 ))
+          if (( ms < 1200 )); then settled=$(( ms * (n + 1) / 1200 ))
+          elif (( ms < 5000 )); then settled=$n
+          elif (( ms < 6200 )); then settled=$(( n - (ms - 5000) * (n + 1) / 1200 ))
+          else settled=0
+          fi
+          noise=
+          for (( i = settled; i < n; i++ )); do noise+=''${glyphs:RANDOM % ''${#glyphs}:1}; done
+          printf '%s<span foreground="#5c5c5c">%s</span>\n' "''${name:0:settled}" "$noise"
+        '';
         text = {
           monitor = "";
           font_family = "JetBrains Mono";
@@ -143,35 +162,25 @@ in
             halign = "center";
             valign = "top";
           }
-          { text = "tushar"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
-          # Breathing caret: every 100ms the tenth of the current second picks
-          # a grey along a 1s fade-out/fade-in. ("##" is a literal "#".)
-          {
-            text = "cmd[update:100] date +%N | cut -c1 | sed 'y/0123456789/aabcdedcba/;s/e/10/;s/d/30/;s/c/70/;s/b/b0/;s/a/e6/;s|.*|<span foreground=\"##&&&\">_</span>|'";
-            color = white;
-            position = "0, -32";
-            halign = "center";
-            valign = "center";
-            zindex = -1; # under the password field
-          }
+          { text = "cmd[update:100] ${scramble}"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
           # The field is faded out after a failed attempt (it's empty), so
           # the failure gets its own label.
-          { text = ''<span foreground="##ff8080">$FAIL</span>''; color = white; position = "0, -64"; halign = "center"; valign = "center"; }
+          { text = ''<span foreground="##ff8080">$FAIL</span>''; color = white; position = "0, -56"; halign = "center"; valign = "center"; }
         ];
         input-field = [{
           monitor = "";
-          size = "28, 28"; # a small square around the "_"
-          position = "0, -32"; # 20px lower than before, clear of "tushar"
-          rounding = 0;
-          outline_thickness = 1;
-          outer_color = "rgb(262626)";
+          size = "16, 16";
+          position = "0, -24";
+          rounding = -1; # a circle
+          outline_thickness = 2;
+          outer_color = "rgb(1a1a1a)"; # the dim ring
           hide_input = true;
-          # Lit corner colour. Grey has no hue, so the random hue rotation
-          # keeps it grey; give it a colour for random-colour flicks.
+          # Lit quarter colour. Grey has no hue, so the random hue rotation
+          # keeps it grey; give it a colour for random-colour ticks.
           hide_input_base_color = "rgb(e6e6e6)";
-          check_color = "rgb(5c5c5c)"; # frame while PAM checks
+          check_color = "rgb(5c5c5c)"; # whole ring while PAM checks
           fail_color = "rgb(000000)";
-          inner_color = "rgba(00000000)"; # see-through: the "_" stays visible
+          inner_color = "rgba(00000000)";
           placeholder_text = "";
           fail_text = "";
           fade_on_empty = true;
