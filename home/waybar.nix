@@ -125,7 +125,7 @@ in
         on-click = "hub bluetooth";
       };
       network = {
-        format-wifi = ic "e1ae";
+        format-wifi = "${ic "e1ae"}  {essid}";
         format-ethernet = ic "e620";
         format-disconnected = ic "e1af";
         tooltip-format-wifi = "{essid} ({signalStrength}%)";
