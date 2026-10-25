@@ -141,6 +141,17 @@ in
   # Route vim.ui.select (treechat's chat/model/thinking pickers, LSP code
   # actions, ...) through telescope instead of the cmdline list.
   programs.nixvim.plugins.telescope.extensions.ui-select.enable = true;
+  # Esc clears search highlights (native :nohlsearch). No-op in normal mode
+  # otherwise, so it's free real estate. Merges with the keymaps list from
+  # the imported nvim-config module above.
+  programs.nixvim.keymaps = [
+    {
+      mode = "n";
+      key = "<Esc>";
+      action = "<cmd>nohlsearch<CR>";
+      options.desc = "Clear search highlight";
+    }
+  ];
   programs.nixvim.extraConfigLua = ''
     local treechat_dir = vim.fn.expand("~/p/treechat.nvim")
     if vim.fn.isdirectory(treechat_dir) == 1 then
