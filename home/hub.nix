@@ -94,10 +94,20 @@ in
         after_sleep_cmd = dpms "enable";
       };
       listener = [
-        { timeout = "$lock"; on-timeout = "loginctl lock-session"; }
-        { timeout = "$off"; on-timeout = dpms "disable"; on-resume = dpms "enable"; }
-        # Suspend only on battery.
-        { timeout = "$suspend"; on-timeout = "[ \"$(cat /sys/class/power_supply/AC0/online)\" = 1 ] || systemctl suspend"; }
+        { 
+          timeout = "$lock"; 
+          on-timeout = "loginctl lock-session"; 
+        }
+        # Suspend + screen-off only on battery.
+        { 
+          timeout = "$off"; 
+          on-timeout = "[ \"$(cat /sys/class/power_supply/AC0/online)\" = 1 ] || ${dpms "disable"}"; 
+          on-resume = dpms "enable"; 
+        }
+        { 
+          timeout = "$suspend"; 
+          on-timeout = "[ \"$(cat /sys/class/power_supply/AC0/online)\" = 1 ] || systemctl suspend"; 
+        }
       ];
     };
   };
