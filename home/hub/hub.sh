@@ -12,8 +12,17 @@
 state=${XDG_STATE_HOME:-$HOME/.local/state}
 idle=$state/hypridle/overrides.conf
 sunset=$state/hyprsunset
+LINES=$(tput lines) COLUMNS=$(tput cols) # not set in non-interactive bash
 
-pick() { gum choose --header "$1" "${@:2}"; } # Esc -> non-zero -> caller returns
+# Menus: hjkl to move/select/back, q or Esc to back out (non-zero -> caller
+# returns). Centred in the hub window via fzf margins.
+pick() {
+  local n=$(( $# + 2 )) w=${#1} i # lines: items + header + prompt; width: longest line
+  for i in "${@:2}"; do (( ${#i} > w )) && w=${#i}; done
+  printf '%s\n' "${@:2}" | fzf --disabled --no-info --layout=reverse --header "$1" --prompt '' \
+    --margin "$(( (LINES - n) / 2 > 0 ? (LINES - n) / 2 : 0 )),$(( (COLUMNS - w - 2) / 2 > 0 ? (COLUMNS - w - 2) / 2 : 0 ))" \
+    --color "$fzf_colors" --bind 'j:down,k:up,l:accept,h:abort,q:abort'
+}
 oops() { gum style --foreground 9 "$1"; sleep 1.2; }
 fzf_colors='bg:#000000,bg+:#1c1c1c,fg:#a0a0a0,fg+:#ffffff,hl:#f5a524,hl+:#f5a524,prompt:#e6e6e6,pointer:#e6e6e6,border:#262626'
 
@@ -106,10 +115,12 @@ nightlight() {
 
 # -------------------------------------------------------------------- power
 power() {
-  local k
-  confirm() { printf '\n  %s? [y/N] ' "$1"; read -rsn1 k; [[ $k == y ]]; }
+  local k i
+  confirm() { tput cup $(( row + ${#lines[@]} + 1 )) $col; printf '%s? [y/N] ' "$1"; read -rsn1 k; [[ $k == y ]]; }
   clear; tput civis
-  printf '\n  l  lock\n  s  suspend\n  e  log out\n  r  reboot\n  p  power off\n\n  esc  cancel\n'
+  local lines=("l  lock" "s  suspend" "e  log out" "r  reboot" "p  power off" "" "q  cancel") row col
+  row=$(( (LINES - ${#lines[@]}) / 2 )); col=$(( (COLUMNS - 12) / 2 ))
+  for i in "${!lines[@]}"; do tput cup $(( row + i )) $col; printf '%s' "${lines[i]}"; done
   read -rsn1 k
   tput cnorm
   case $k in

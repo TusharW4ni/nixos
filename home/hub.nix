@@ -24,7 +24,7 @@ let
     runtimeInputs = with pkgs; [
       gum fzf jq gnused coreutils util-linux brightnessctl
       wifitui bluetui wiremix systemd-manager-tui hyprmon
-      curl tailscale lazydocker wl-clipboard procps
+      curl tailscale lazydocker wl-clipboard procps ncurses
     ];
     text = ''
       SYNCTHING_CONFIG=${config.home.homeDirectory}/Sync/.config/syncthing/config.xml # dataDir in modules/system/syncthing.nix
