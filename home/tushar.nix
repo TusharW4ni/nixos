@@ -1,4 +1,4 @@
-{ pkgs, inputs, config, ... }:
+{ pkgs, lib, inputs, config, ... }:
 let
   nixos-switch = pkgs.writeShellScriptBin "nixos-switch" ''
     set -e
@@ -151,7 +151,31 @@ in
       action = "<cmd>nohlsearch<CR>";
       options.desc = "Clear search highlight";
     }
-  ];
+  ]
+  # C-h/j/k/l window navigation in normal + terminal mode. Normal mode uses
+  # the native <C-w> prefix; terminal mode needs <C-\><C-n> to escape first.
+  ++ (map
+    (dir: {
+      mode = "n";
+      key = "<C-${dir}>";
+      action = "<C-w>${dir}";
+      options.desc = "Window ${dir}";
+    })
+    [ "h" "j" "k" "l" ]
+  )
+  ++ (map
+    (dir: {
+      mode = "t";
+      key = "<C-${dir}>";
+      action = "<C-\\><C-n><C-w>${dir}";
+      options.desc = "Window ${dir}";
+    })
+    [ "h" "j" "k" "l" ]
+  )
+  ;
+  # copilot-vim is enabled by the imported nvim-config module; disable it
+  # here. Its <Plug> keymaps (also from that module) become inert no-ops.
+  programs.nixvim.plugins.copilot-vim.enable = lib.mkForce false;
   programs.nixvim.extraConfigLua = ''
     local treechat_dir = vim.fn.expand("~/p/treechat.nvim")
     if vim.fn.isdirectory(treechat_dir) == 1 then
