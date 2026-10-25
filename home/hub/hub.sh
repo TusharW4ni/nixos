@@ -14,14 +14,22 @@ idle=$state/hypridle/overrides.conf
 sunset=$state/hyprsunset
 LINES=$(tput lines) COLUMNS=$(tput cols) # not set in non-interactive bash
 
-# Menus: hjkl to move/select/back, q or Esc to back out (non-zero -> caller
-# returns). Centred in the hub window via fzf margins.
+# Menus, vim-style. Normal mode: hjkl move/select/back, q or Esc back out
+# (non-zero -> caller returns), i or a start typing. Insert mode: type to
+# filter, Esc back to normal. Full-width prompt; items and header are padded
+# so the block sits centred.
 pick() {
-  local n=$(( $# + 2 )) w=${#1} i # lines: items + header + prompt; width: longest line
+  local n=$(( $# + 2 )) w=${#1} i pad # lines: items + header + prompt; width: longest line
   for i in "${@:2}"; do (( ${#i} > w )) && w=${#i}; done
-  printf '%s\n' "${@:2}" | fzf --disabled --no-info --layout=reverse --header "$1" --prompt '' \
-    --margin "$(( (LINES - n) / 2 > 0 ? (LINES - n) / 2 : 0 )),$(( (COLUMNS - w - 2) / 2 > 0 ? (COLUMNS - w - 2) / 2 : 0 ))" \
-    --color "$fzf_colors" --bind 'j:down,k:up,l:accept,h:abort,q:abort'
+  pad=$(( (COLUMNS - w) / 2 - 2 )); (( pad < 0 )) && pad=0
+  pad=$(printf '%*s' "$pad" '')
+  local keys=j,k,l,h,q,i,a
+  printf "$pad%s\n" "${@:2}" | fzf --disabled --no-info --layout=reverse --header "$pad$1" --prompt '' \
+    --margin "$(( (LINES - n) / 2 > 0 ? (LINES - n) / 2 : 0 )),0" --color "$fzf_colors" \
+    --bind "j:down,k:up,l:accept,h:abort,q:abort" \
+    --bind "i:enable-search+change-prompt(> )+unbind($keys),a:enable-search+change-prompt(> )+unbind($keys)" \
+    --bind "esc:transform:[ \"\$FZF_PROMPT\" = '> ' ] && echo 'disable-search+change-prompt()+rebind($keys)' || echo abort" \
+    | sed 's/^ *//'
 }
 oops() { gum style --foreground 9 "$1"; sleep 1.2; }
 fzf_colors='bg:#000000,bg+:#1c1c1c,fg:#a0a0a0,fg+:#ffffff,hl:#f5a524,hl+:#f5a524,prompt:#e6e6e6,pointer:#e6e6e6,border:#262626'
