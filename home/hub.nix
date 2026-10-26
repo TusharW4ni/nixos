@@ -130,7 +130,7 @@ in
   ];
 
   # Lock screen: black, the top bar's clock where the bar would be, and
-  # "tushar" centred, looping through a matrix-style decode/re-encode.
+  # a monologue centred, each line decoding in and scrambling out.
   # Typing echoes nothing: the password field is a small ring under the name,
   # and hyprlock's hide_input lights a random quarter of it on every
   # keystroke, so it ticks like a spinner while you type and fades out when
@@ -141,23 +141,75 @@ in
     settings =
       let
         white = "rgb(e6e6e6)";
-        # 6.5s loop: random glyphs settle into "tushar" left to right (1.2s),
-        # hold, scramble back right to left (1.2s), stay scrambled briefly.
-        # Unsettled glyphs are grey. Run every 100ms by the label below.
-        scramble = pkgs.writeShellScript "hyprlock-scramble" ''
-          name=tushar
+        # The machine talks: "tushar", then the lines of ./hub/lock-story.txt,
+        # each decoding in left to right, holding long enough to read, and
+        # scrambling out right to left. Unsettled glyphs are grey; spaces stay
+        # spaces so the words keep their shape. The first paragraph always
+        # comes first, the rest are shuffled per lock, and the whole thing
+        # loops. Stateless: the position is worked out from how long this
+        # hyprlock has been running, so it starts at "tushar" on every lock.
+        # Run every 100ms by the label below; `story <ms>` prints the frame at
+        # that point, for testing.
+        story = pkgs.writeShellScript "hyprlock-story" ''
           glyphs='abcdefghijklmnopqrstuvwxyz0123456789#%*+=?/'
-          n=''${#name}
-          t=''${EPOCHREALTIME/[.,]/}
-          ms=$(( t / 1000 % 6500 ))
-          if (( ms < 1200 )); then settled=$(( ms * (n + 1) / 1200 ))
-          elif (( ms < 5000 )); then settled=$n
-          elif (( ms < 6200 )); then settled=$(( n - (ms - 5000) * (n + 1) / 1200 ))
+          if [[ -n ''${1-} ]]; then
+            ms=$1 seed=1
+          else
+            p=$PPID # hyprlock runs this via sh -c; walk up to hyprlock itself
+            for _ in 1 2 3; do
+              read -r comm < /proc/$p/comm
+              [[ $comm == hyprlock ]] && break
+              read -ra st < /proc/$p/stat; p=''${st[3]}
+            done
+            read -ra st < /proc/$p/stat; read -r up _ < /proc/uptime
+            ms=$(( ''${up/./}0 - st[21] * 10 )) seed=$p # both clocks in ms (CLK_TCK=100)
+          fi
+
+          # Paragraphs as start/end indices into raw.
+          mapfile -t raw < ${./hub/lock-story.txt}
+          starts=() ends=() s=-1
+          for i in "''${!raw[@]}"; do
+            if [[ -z ''${raw[i]} ]]; then (( s >= 0 )) && starts+=("$s") ends+=("$i") s=-1
+            elif (( s < 0 )); then s=$i
+            fi
+          done
+          (( s >= 0 )) && starts+=("$s") ends+=("''${#raw[@]}")
+
+          RANDOM=$seed order=()
+          for (( g = 1; g < ''${#starts[@]}; g++ )); do order+=("$g"); done
+          for (( i = ''${#order[@]} - 1; i > 0; i-- )); do
+            j=$(( RANDOM % (i + 1) )); g=''${order[i]}; order[i]=''${order[j]}; order[j]=$g
+          done
+          lines=(tushar)
+          for g in 0 "''${order[@]}"; do lines+=("''${raw[@]:starts[g]:ends[g]-starts[g]}"); done
+
+          # Per line: decode, hold (reading time), scramble out, a beat of noise.
+          dur() { change=$(( $1 * 25 > 1000 ? $1 * 25 : 1000 )) hold=$(( 1500 + $1 * 60 )); }
+          total=0
+          for l in "''${lines[@]}"; do dur ''${#l}; total=$(( total + 2 * change + hold + 300 )); done
+          t=$(( ms % total ))
+          for l in "''${lines[@]}"; do
+            dur ''${#l}; len=$(( 2 * change + hold + 300 ))
+            (( t < len )) && break
+            t=$(( t - len ))
+          done
+
+          m=$(( ms / 60000 ))
+          case $m in 0) away="less than a minute" ;; 1) away="a minute" ;; *) away="$m minutes" ;; esac
+          l=''${l//\{away\}/$away}
+          n=''${#l}
+          if (( t < change )); then settled=$(( t * (n + 1) / change ))
+          elif (( t < change + hold )); then settled=$n
+          elif (( t < 2 * change + hold )); then settled=$(( n - (t - change - hold) * (n + 1) / change ))
           else settled=0
           fi
-          noise=
-          for (( i = settled; i < n; i++ )); do noise+=''${glyphs:RANDOM % ''${#glyphs}:1}; done
-          printf '%s<span foreground="#5c5c5c">%s</span>\n' "''${name:0:settled}" "$noise"
+          (( settled > n )) && settled=$n; (( settled < 0 )) && settled=0
+
+          RANDOM=$t noise=
+          for (( i = settled; i < n; i++ )); do
+            c=''${l:i:1}; [[ $c == " " ]] || c=''${glyphs:RANDOM % ''${#glyphs}:1}; noise+=$c
+          done
+          printf '%s<span foreground="#5c5c5c">%s</span>\n' "''${l:0:settled}" "$noise"
         '';
         text = {
           monitor = "";
@@ -189,7 +241,7 @@ in
             halign = "center";
             valign = "top";
           }
-          { text = "cmd[update:100] ${scramble}"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
+          { text = "cmd[update:100] ${story}"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
           # The field is faded out after a failed attempt (it's empty), so
           # the failure gets its own label.
           { text = ''<span foreground="##ff8080">$FAIL</span>''; color = white; position = "0, -56"; halign = "center"; valign = "center"; }
