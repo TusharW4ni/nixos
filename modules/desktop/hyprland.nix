@@ -8,4 +8,5 @@
   # Make Electron/Chromium apps (Chrome, Slack, Discord, VS Code...) run as
   # native Wayland clients under Hyprland instead of blurry XWayland.
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment.sessionVariables.EDITOR = "nvim";
 }
