@@ -1,5 +1,5 @@
-# Notifications: black mako banners that never auto-dismiss (except Ghostty
-# and screenshots, 5 s), manual DND,
+# Notifications: black mako banners that never auto-dismiss (except Ghostty,
+# herdr and screenshots, 5 s), manual DND,
 # screenshot/media banners, and low-battery alerts.
 { pkgs, ... }:
 let
@@ -36,6 +36,8 @@ in
       # GLib sends Ghostty's banners with an empty app-name; match its app id.
       "desktop-entry=com.mitchellh.ghostty" = { default-timeout = 5000; };
       "app-name=screenshot" = { default-timeout = 5000; };
+      # herdr toasts ("claude finished") shell out to notify-send without -a.
+      "app-name=notify-send" = { default-timeout = 5000; };
       # DND hides banners; they reappear when DND ends. Critical ones
       # (low battery) still show.
       "mode=dnd" = { invisible = 1; };
