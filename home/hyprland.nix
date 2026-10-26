@@ -41,6 +41,17 @@ in {
     brightnessctl # brightness keys
   ];
 
+  # Screen-share picker with live thumbnails, replacing xdph's default one.
+  # allow_token_by_default lets apps remember the last choice instead of
+  # prompting every time. Needs `systemctl --user restart
+  # xdg-desktop-portal-hyprland` to pick up changes.
+  xdg.configFile."hypr/xdph.conf".text = ''
+    screencopy {
+      custom_picker_binary = ${pkgs.hyprland-preview-share-picker}/bin/hyprland-preview-share-picker
+      allow_token_by_default = true
+    }
+  '';
+
   # Screenshots save to ~/ss/pics, recordings to ~/ss/vids. Create both up front so satty can save.
   systemd.user.tmpfiles.rules = [ "d %h/ss/pics - - - -" "d %h/ss/vids - - - -" ];
 
