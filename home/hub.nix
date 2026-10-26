@@ -145,15 +145,17 @@ in
         # each decoding in left to right, holding long enough to read, and
         # scrambling out right to left. Unsettled glyphs are grey; spaces stay
         # spaces so the words keep their shape. The first paragraph always
-        # comes first, the rest are shuffled per lock, and the whole thing
-        # loops. Stateless: the position is worked out from how long this
-        # hyprlock has been running, so it starts at "tushar" on every lock.
-        # Run every 100ms by the label below; `story <ms>` prints the frame at
-        # that point, for testing.
+        # comes first; the rest follow in a fixed shuffled order that each
+        # lock starts one paragraph further into (a lock count in
+        # ~/.local/state/hyprlock-story), so every lock opens with something
+        # new until they've all been shown. The position within a lock is
+        # worked out from how long this hyprlock has been running, so it
+        # starts at "tushar" every time. Run every 100ms by the label below;
+        # `story <ms> [count]` prints the frame at that point, for testing.
         story = pkgs.writeShellScript "hyprlock-story" ''
           glyphs='abcdefghijklmnopqrstuvwxyz0123456789#%*+=?/'
           if [[ -n ''${1-} ]]; then
-            ms=$1 seed=1
+            ms=$1 count=''${2:-0}
           else
             p=$PPID # hyprlock runs this via sh -c; walk up to hyprlock itself
             for _ in 1 2 3; do
@@ -162,7 +164,11 @@ in
               read -ra st < /proc/$p/stat; p=''${st[3]}
             done
             read -ra st < /proc/$p/stat; read -r up _ < /proc/uptime
-            ms=$(( ''${up/./}0 - st[21] * 10 )) seed=$p # both clocks in ms (CLK_TCK=100)
+            ms=$(( ''${up/./}0 - st[21] * 10 )) # both clocks in ms (CLK_TCK=100)
+            # Bump the count once per hyprlock: the first tick to see a new pid wins.
+            f=$HOME/.local/state/hyprlock-story
+            { read -r pid count < "$f"; } 2>/dev/null
+            [[ ''${pid-} == "$p" ]] || { count=$(( ''${count:-0} + 1 )); echo "$p $count" > "$f"; }
           fi
 
           # Paragraphs as start/end indices into raw.
@@ -175,11 +181,12 @@ in
           done
           (( s >= 0 )) && starts+=("$s") ends+=("''${#raw[@]}")
 
-          RANDOM=$seed order=()
+          RANDOM=1 order=()
           for (( g = 1; g < ''${#starts[@]}; g++ )); do order+=("$g"); done
           for (( i = ''${#order[@]} - 1; i > 0; i-- )); do
             j=$(( RANDOM % (i + 1) )); g=''${order[i]}; order[i]=''${order[j]}; order[j]=$g
           done
+          k=$(( count % ''${#order[@]} )); order=("''${order[@]:k}" "''${order[@]:0:k}")
           lines=(tushar)
           for g in 0 "''${order[@]}"; do lines+=("''${raw[@]:starts[g]:ends[g]-starts[g]}"); done
 
