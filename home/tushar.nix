@@ -55,6 +55,7 @@ let
 in
 {
   imports = [
+    ./omp.nix
     inputs.nixvim.homeModules.nixvim
     # nixvim config sourced from the nvim repo's nixvim branch (see flake input)
     "${inputs.nvim-config}/nvim.nix"
@@ -230,11 +231,13 @@ in
   # guard could fail and the aliases silently vanish.
   #   c  -> claude (auto mode)
   #   cw -> claude in a fresh git worktree (auto mode; accepts an optional name)
+  #   o  -> omp (see ./omp.nix)
   #   ponder -> headless ponder-skill loop: ponder [repo] [sleep-seconds]
   programs.bash.shellAliases = {
     ns = "nixos-switch";
     c = "claude --permission-mode auto";
     cw = "claude --permission-mode auto --worktree";
+    o = "omp";
     ponder = "~/.claude/skills/ponder/scripts/ponder.sh";
     yazi = "y"; # the y wrapper cds into yazi's last directory on exit
   };
