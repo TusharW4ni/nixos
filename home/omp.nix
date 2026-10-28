@@ -4,11 +4,13 @@
 let
   settings = {
     # Roles route work by intent: the premium model only sees planning and
-    # hard reasoning, while subagent fan-out (smol) runs cheap.
+    # hard reasoning, while subagent fan-out (smol) runs cheap. Values are
+    # provider-qualified — a bare "meta/muse-spark-1.3" is parsed as provider
+    # "meta" and silently falls back to an unrelated default model.
     modelRoles = {
-      default = "meta/muse-spark-1.3";
-      slow = "meta/muse-wonder";
-      smol = "z-ai/glm-5.3";
+      default = "openrouter/meta/muse-spark-1.3";
+      slow = "openrouter/meta/muse-wonder";
+      smol = "openrouter/z-ai/glm-5.3";
     };
   };
   configFile = (pkgs.formats.yaml { }).generate "omp-config.yml" settings;
