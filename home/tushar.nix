@@ -118,6 +118,8 @@ in
     # Source-built from pkgs/claude-sync.nix (bump version there to update;
     # `claude-sync update` can't self-update the read-only Nix store).
     (pkgs.callPackage ../pkgs/claude-sync.nix { })
+    # Slack TUI, source-built from pkgs/slk.nix.
+    (pkgs.callPackage ../pkgs/slk.nix { })
     # pi coding agent. Also the harness behind treechat.nvim (pi --mode rpc).
     # API keys live in ~/.pi/agent (run `pi`, then /login), outside the store.
     pi-coding-agent
