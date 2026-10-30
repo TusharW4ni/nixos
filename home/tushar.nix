@@ -100,6 +100,7 @@ in
     discord
     slack
     obsidian
+    anki
     freecad
     blender
     # AWS CLI v2. `aws configure`/`aws sso login` write creds to ~/.aws, which
