@@ -100,7 +100,7 @@ in
     discord
     slack
     obsidian
-    anki
+    (anki.withAddons [ ankiAddons.anki-connect ])
     freecad
     blender
     # AWS CLI v2. `aws configure`/`aws sso login` write creds to ~/.aws, which
