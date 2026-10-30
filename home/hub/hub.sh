@@ -232,6 +232,29 @@ gdrive_menu() {
   done
 }
 
+# ----------------------------------------------------------------- calendar
+# Three months, today highlighted. h/l month, k/j year, t today, q or Esc closes.
+calendar() {
+  local m y k pad
+  m=$(date +%-m) y=$(date +%Y)
+  pad=$(printf '%*s' $(( (COLUMNS - 64) / 2 > 0 ? (COLUMNS - 64) / 2 : 0 )) '') # cal -3 is 64 wide
+  while :; do
+    clear
+    printf '\n%.0s' $(seq $(( (LINES - 10) / 2 )))
+    cal --color=always -3 "$m" "$y" | sed "s/^/$pad/"
+    gum style --foreground 8 "$pad    h/l month · k/j year · t today · q close"
+    read -rsn1 k || return
+    case $k in
+      h) (( --m < 1 )) && m=12 y=$(( y - 1 )) ;;
+      l) (( ++m > 12 )) && m=1 y=$(( y + 1 )) ;;
+      k) y=$(( y - 1 )) ;;
+      j) y=$(( y + 1 )) ;;
+      t) m=$(date +%-m) y=$(date +%Y) ;;
+      q|$'\e') return ;;
+    esac
+  done
+}
+
 # Redraw the bar's service icons (home/waybar.nix, signal 10).
 refresh() { pkill -RTMIN+10 waybar || true; }
 
@@ -254,6 +277,7 @@ run() {
     syncthing) syncthing_menu ;;
     docker) lazydocker; refresh ;;
     gdrive) gdrive_menu ;;
+    calendar) calendar ;;
     *) oops "unknown section: $1"; return 1 ;;
   esac
 }

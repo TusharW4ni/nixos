@@ -74,6 +74,7 @@ in
         exec = "date '+%a %m/%d · %H:%M:%S'";
         interval = 1;
         tooltip = false;
+        on-click = "hub calendar";
       };
       "custom/tailscale" = service "tailscale";
       "custom/syncthing" = service "syncthing";
