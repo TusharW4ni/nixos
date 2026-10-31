@@ -134,6 +134,48 @@ local function cycle(step)
   end
 end
 
+-- Float workspaces: Super + Shift + F toggles the current workspace between
+-- tiling and float-only. Every window opened on or moved to a float workspace
+-- floats. The set is kept in a mutable state file outside the repo so it
+-- survives reloads.
+local float_file = home .. "/.local/state/hypr/float-workspaces"
+local float_ws = {} -- workspace id -> true
+local f = io.open(float_file)
+if f then
+  for line in f:lines() do float_ws[tonumber(line) or 0] = true end
+  f:close()
+end
+
+local function set_float(w, on)
+  hl.dispatch(hl.dsp.window.float({ action = on and "enable" or "disable", window = "address:" .. w.address }))
+end
+
+local function float_all()
+  for id in pairs(float_ws) do
+    for _, w in ipairs(hl.get_workspace_windows(id)) do
+      if not w.floating then set_float(w, true) end
+    end
+  end
+end
+hl.on("window.open", float_all)
+hl.on("window.move_to_workspace", float_all)
+
+bind(mod .. " + SHIFT + F", function()
+  local ws = hl.get_active_workspace()
+  if not ws then return end
+  local on = not float_ws[ws.id]
+  float_ws[ws.id] = on or nil
+  for _, w in ipairs(hl.get_workspace_windows(ws.id)) do
+    if w.floating ~= on then set_float(w, on) end
+  end
+  os.execute("mkdir -p '" .. home .. "/.local/state/hypr'")
+  local out = io.open(float_file, "w")
+  if out then
+    for id in pairs(float_ws) do out:write(id, "\n") end
+    out:close()
+  end
+end, "Toggle float-only mode for this workspace")
+
 bind(mod .. " + TAB", hl.dsp.focus({ workspace = "previous" }), "Previous workspace (toggle)")
 bind(mod .. " + bracketleft", cycle(-1), "Previous open workspace in this group")
 bind(mod .. " + bracketright", cycle(1), "Next open workspace in this group")
