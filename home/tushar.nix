@@ -52,6 +52,17 @@ let
     google-chrome-stable --new-window "$URL" >/dev/null 2>&1 &
     wait
   '';
+  # Every Claude Code session gets its own systemd scope in claude.slice
+  # (below). The slice's low CPU weight keeps the desktop responsive when
+  # sessions max out the CPU, and under memory pressure systemd-oomd kills
+  # the single worst session instead of the whole Ghostty window. Shadows the
+  # system claude-code package, which comes later on PATH.
+  claude = pkgs.writeShellScriptBin "claude" ''
+    real=/run/current-system/sw/bin/claude
+    # No user systemd bus (e.g. a bare TTY): run it directly.
+    [ -S "''${XDG_RUNTIME_DIR:-/nonexistent}/bus" ] || exec "$real" "$@"
+    exec ${pkgs.systemd}/bin/systemd-run --user --scope --quiet --collect --slice=claude.slice -- "$real" "$@"
+  '';
 in
 {
   imports = [
@@ -74,6 +85,7 @@ in
   home.sessionPath = [ "$HOME/.bun/bin" "$HOME/.local/bin" ];
 
   home.packages = with pkgs; [
+    claude # scope wrapper (above)
     nixos-switch
     devices
     # Playwright CLI wired to nixpkgs' own browsers (incl. WebKit); the
@@ -224,6 +236,17 @@ in
     automatic = true;
     dates = "weekly";
     options = "--delete-older-than 14d";
+  };
+
+  # Claude Code sessions (see the claude wrapper above). CPUWeight is
+  # relative to the desktop apps' 100: under contention they get 5x the CPU.
+  systemd.user.slices.claude = {
+    Unit.Description = "Claude Code sessions";
+    Slice = {
+      CPUWeight = 20;
+      ManagedOOMMemoryPressure = "kill";
+      ManagedOOMMemoryPressureLimit = "60%";
+    };
   };
 
   programs.bash.enable = true;

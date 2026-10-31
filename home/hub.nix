@@ -25,6 +25,7 @@ let
       gum fzf jq gnused coreutils util-linux brightnessctl
       wifitui bluetui wiremix systemd-manager-tui hyprmon
       curl tailscale lazydocker wl-clipboard procps ncurses
+      gdu duf smartmontools
     ];
     text = ''
       SYNCTHING_CONFIG=${config.home.homeDirectory}/Sync/.config/syncthing/config.xml # dataDir in modules/system/syncthing.nix
@@ -63,7 +64,7 @@ let
   '';
 in
 {
-  home.packages = [ hub hyprmon ];
+  home.packages = [ hub hyprmon ] ++ (with pkgs; [ gdu duf smartmontools ]); # disk tools, also in hub > disk
 
   wayland.windowManager.hyprland.extraLuaFiles.hub = ./hypr/hub.lua;
 
@@ -76,6 +77,7 @@ in
     hub-nightlight = section "nightlight" "Night Light";
     hub-power = section "power" "Power Menu";
     hub-keys = section "keys" "Keybinds";
+    hub-disk = section "disk" "Disk Space and Health";
   };
 
   # Auto-lock. Timeouts are variables so the hub's override file (sourced

@@ -12,6 +12,8 @@
     ../../modules/system/docker.nix
     ../../modules/system/syncthing.nix
     ../../modules/system/nix-ld.nix
+    ../../modules/system/battery.nix
+    ../../modules/system/memory.nix
     ../../modules/desktop/session.nix
     ../../modules/desktop/fonts.nix
     ../../modules/desktop/gdrive.nix
@@ -54,6 +56,14 @@
     dates = "weekly";
     options = "--delete-older-than 14d";
   };
+  # Hard-link identical files in the store (weekly). Saves space without
+  # slowing every build the way auto-optimise-store does.
+  nix.optimise.automatic = true;
+
+  # Hardware video decode/encode (VA-API) on the Alder Lake iGPU. Without it,
+  # Chrome, Slack and Discord decode video calls on the CPU.
+  hardware.graphics.extraPackages = [ pkgs.intel-media-driver ];
+  environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

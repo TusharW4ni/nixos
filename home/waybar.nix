@@ -138,8 +138,15 @@ in
         states = { warning = 20; critical = 10; };
         format = "{icon}  {capacity}%";
         format-charging = "${icLow "e054"}  {capacity}%";
+        # Plug: on wall power but not charging, i.e. at the charge limit
+        # (modules/system/battery.nix). The battery sits idle until unplugged.
+        format-plugged = "${icLow "e37f"}  {capacity}%";
+        format-full = "${icLow "e37f"}  {capacity}%";
         format-icons = [ (icLow "e056") (icLow "e057") (icLow "e055") ]; # low, medium, full
-        tooltip-format = "{timeTo}";
+        tooltip-format = "on battery · {timeTo}";
+        tooltip-format-charging = "charging to 80% · {timeTo}";
+        tooltip-format-plugged = "on wall power, battery idle at the 80% limit";
+        tooltip-format-full = "on wall power, battery idle at the 80% limit";
       };
     };
 

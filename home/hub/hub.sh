@@ -232,6 +232,37 @@ gdrive_menu() {
   done
 }
 
+# --------------------------------------------------------------------- disk
+# Each entry names the tool it runs, so the command is there to learn.
+disk_menu() {
+  local c dev used
+  pause() { gum style --foreground 8 "press any key"; read -rsn1 -r _; }
+  sure() { gum confirm "$1?" --default=false; }
+  dev=/dev/$(lsblk -dno NAME,TYPE | awk '$2 == "disk" { print $1; exit }')
+  while :; do
+    used=$(df -h --output=used,size,pcent / | awk 'NR == 2 { printf "%s of %s used (%s)", $1, $2, $3 }')
+    c=$(pick "disk: $used" \
+      "overview · duf" \
+      "space in home · gdu ~" \
+      "space everywhere · gdu /" \
+      "health · smartctl -a $dev" \
+      "docker space · docker system df" \
+      "clean docker · docker system prune" \
+      "clean nix · nix-collect-garbage") || return
+    case $c in
+      overview*) clear; duf --only local; pause ;;
+      "space in home"*) gdu "$HOME" ;;
+      "space everywhere"*) gdu / ;;
+      health*) clear; sudo "$(command -v smartctl)" -a "$dev" | gum pager ;;
+      "docker space"*) clear; docker system df; pause ;;
+      "clean docker"*) sure "remove stopped containers and images + build cache unused for a week" \
+        && { docker system prune --all --force --filter until=168h; pause; } ;;
+      "clean nix"*) sure "delete generations older than 14 days and collect garbage" \
+        && { sudo "$(command -v nix-collect-garbage)" --delete-older-than 14d; pause; } ;;
+    esac
+  done
+}
+
 # ----------------------------------------------------------------- calendar
 # Three months, today highlighted. h/l month, k/j year, t today, q or Esc closes.
 calendar() {
@@ -277,6 +308,7 @@ run() {
     syncthing) syncthing_menu ;;
     docker) lazydocker; refresh ;;
     gdrive) gdrive_menu ;;
+    disk) disk_menu ;;
     calendar) calendar ;;
     *) oops "unknown section: $1"; return 1 ;;
   esac
@@ -291,6 +323,6 @@ if [[ $# -gt 0 ]]; then
   exit
 fi
 while c=$(pick "hub" wifi bluetooth audio displays brightness nightlight autolock power keys services \
-  tailscale syncthing docker gdrive); do
+  tailscale syncthing docker gdrive disk); do
   run "$c"
 done
