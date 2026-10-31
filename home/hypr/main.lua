@@ -105,6 +105,8 @@ end
 -- window to a slot in this group, Super + Ctrl + Shift + `/1-9 to another
 -- group. id = group * 10 + slot, with ` as group 0 and slot 10: group ` is
 -- 1-10 (the plain 1-9 stay put), group 1 is 11-20, group 9 is 91-100.
+-- The numpad mirrors the row: KP_0 acts as `, KP_1-9 as 1-9. Bound by
+-- keycode, so it works with NumLock on or off.
 local function group_of(id) return math.floor((id - 1) / 10) end
 local group_last = {} -- group -> workspace last active there; resets on reload
 hl.on("workspace.active", function(ws)
@@ -117,22 +119,24 @@ local function current_group()
 end
 local function group_target(n) return group_last[n] or n * 10 + 1 end
 
+local keypad = { [0] = 90, 87, 88, 89, 83, 84, 85, 79, 80, 81 } -- KP_0-9 keycodes
 for n = 0, 9 do
-  local key = n == 0 and "grave" or tostring(n)
-  local label = n == 0 and "`" or key
+  local label = n == 0 and "`" or tostring(n)
   local slot = n == 0 and 10 or n
-  bind(mod .. " + " .. key, function()
-    hl.dispatch(hl.dsp.focus({ workspace = current_group() * 10 + slot }))
-  end, "Go to slot " .. label .. " in this group")
-  bind(mod .. " + SHIFT + " .. key, function()
-    hl.dispatch(hl.dsp.window.move({ workspace = current_group() * 10 + slot }))
-  end, "Move window to slot " .. label .. " in this group")
-  bind(mod .. " + CTRL + " .. key, function()
-    hl.dispatch(hl.dsp.focus({ workspace = group_target(n) }))
-  end, "Switch to workspace group " .. label)
-  bind(mod .. " + CTRL + SHIFT + " .. key, function()
-    if n ~= current_group() then hl.dispatch(hl.dsp.window.move({ workspace = group_target(n) })) end
-  end, "Move window to workspace group " .. label)
+  for _, key in ipairs({ n == 0 and "grave" or tostring(n), "code:" .. keypad[n] }) do
+    bind(mod .. " + " .. key, function()
+      hl.dispatch(hl.dsp.focus({ workspace = current_group() * 10 + slot }))
+    end, "Go to slot " .. label .. " in this group")
+    bind(mod .. " + SHIFT + " .. key, function()
+      hl.dispatch(hl.dsp.window.move({ workspace = current_group() * 10 + slot }))
+    end, "Move window to slot " .. label .. " in this group")
+    bind(mod .. " + CTRL + " .. key, function()
+      hl.dispatch(hl.dsp.focus({ workspace = group_target(n) }))
+    end, "Switch to workspace group " .. label)
+    bind(mod .. " + CTRL + SHIFT + " .. key, function()
+      if n ~= current_group() then hl.dispatch(hl.dsp.window.move({ workspace = group_target(n) })) end
+    end, "Move window to workspace group " .. label)
+  end
 end
 
 -- Step through the open workspaces of the current group, wrapping around.
