@@ -41,6 +41,7 @@ hl.config({
     gaps_in = 4,
     gaps_out = 8,
     border_size = 2,
+    resize_on_border = true, -- drag any window edge to resize (floats too)
     col = {
       active_border = "rgb(5c5c5c)",
       inactive_border = "rgb(1c1c1c)",
@@ -77,6 +78,12 @@ bind(mod .. " + F", hl.dsp.window.fullscreen(), "Fullscreen")
 bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }), "Toggle floating")
 
 -- Focus
+for _, step in ipairs({ { "ALT + TAB", true, "Next" }, { "ALT + SHIFT + TAB", false, "Previous" } }) do
+  bind(step[1], function()
+    hl.dispatch(hl.dsp.window.cycle_next({ next = step[2] }))
+    hl.dispatch(hl.dsp.window.bring_to_top()) -- floats overlap; raise the focused one
+  end, step[3] .. " window in this workspace")
+end
 for _, dir in ipairs({ "left", "right", "up", "down" }) do
   bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), "Focus " .. dir)
 end
