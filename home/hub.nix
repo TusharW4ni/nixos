@@ -60,7 +60,7 @@ let
     # @vicinae.title ${title}
     # @vicinae.mode silent
     # @vicinae.keywords ["hub", "settings", "${name}"]
-    ${pkgs.util-linux}/bin/setsid -f ghostty --class=dev.tushar.hub -e hub ${name} >/dev/null 2>&1
+    ${pkgs.util-linux}/bin/setsid -f ${pkgs.systemd}/bin/systemd-run --user --scope --collect --quiet --slice=app.slice -- ghostty --class=dev.tushar.hub -e hub ${name} >/dev/null 2>&1
   '';
 in
 {

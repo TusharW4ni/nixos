@@ -4,6 +4,10 @@
 { pkgs, lib, config, ... }:
 let
   home = config.home.homeDirectory;
+  # Every app or script the launcher starts gets its own systemd scope, so it
+  # outlives the vicinae service (a restart, e.g. on switch, used to kill
+  # everything launched from it).
+  scope = "${pkgs.systemd}/bin/systemd-run --user --scope --collect --quiet --slice=app.slice --";
   setsid = "${pkgs.util-linux}/bin/setsid";
   chrome = "${pkgs.google-chrome}/bin/google-chrome-stable";
 
@@ -18,7 +22,7 @@ let
       # @vicinae.mode silent
       # @vicinae.keywords ["claude", "ai"]
       # @vicinae.argument1 { "type": "text", "placeholder": "prompt", "percentEncoded": true }
-      ${setsid} -f ${chrome} --profile-directory=Default "https://claude.ai/new?q=$1" >/dev/null 2>&1
+      ${setsid} -f ${scope} ${chrome} --profile-directory=Default "https://claude.ai/new?q=$1" >/dev/null 2>&1
       echo "Asked Claude"
     '';
   } // config.vicinaeScripts;
@@ -109,6 +113,7 @@ in
             # rclone network mount: indexing it would download the whole Drive.
             excludedIndexingPaths = [ "${home}/gdrive" ];
           };
+          applications.preferences.launchPrefix = scope;
           files.entrypoints.search.alias = "f";
           clipboard.entrypoints.history.alias = "v";
           scripts.preferences.customDirs = [ "${scriptDir}" ];
