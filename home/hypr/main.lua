@@ -64,7 +64,19 @@ hl.layer_rule({ name = "vicinae-no-anim", match = { namespace = "vicinae" }, no_
 -- Autostart
 ------------------------------------------------------------------------------
 -- Session services (bar, notifications, DND watcher, ...) are systemd user
--- units started with graphical-session.target; nothing to start here.
+-- units started with graphical-session.target. Apps that belong on a fixed
+-- workspace start here, once per session (hyprland.start does not fire on
+-- reload). Slot 1 lives on the external display, slot 2 on the laptop panel;
+-- without the external display both fall back to the panel.
+hl.workspace_rule({ workspace = "1", monitor = "HDMI-A-1", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "eDP-1", default = true })
+
+hl.on("hyprland.start", function()
+  hl.exec_cmd("ghostty -e herdr", { workspace = 1 })
+  hl.exec_cmd("google-chrome-stable --profile-directory=Default", { workspace = 2 }) -- parone.com profile
+  hl.exec_cmd("slack", { workspace = 3, float = true })
+  hl.exec_cmd("discord", { workspace = 3, float = true })
+end)
 
 ------------------------------------------------------------------------------
 -- Binds
