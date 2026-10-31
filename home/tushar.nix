@@ -118,6 +118,8 @@ in
     # AWS CLI v2. `aws configure`/`aws sso login` write creds to ~/.aws, which
     # is outside the Nix store and persists across rebuilds.
     awscli2
+    # Bitwarden CLI (`bw`); also the backend the Bitwarden MCP server shells out to.
+    bitwarden-cli
     # Bun runtime. Lets `bunx`/`bun add -g` run npm-published TUIs & tools
     # through a nix-patched runtime, avoiding the `curl | sh` prebuilt-binary
     # dynamic-linker breakage on NixOS.
