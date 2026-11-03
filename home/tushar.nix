@@ -271,6 +271,7 @@ in
     "..." = "cd ../..";
     "...." = "cd ../../..";
     ava = "cd ~/w/app.avagolf.com";
+    ava-cw = "cd ~/w/app.avagolf.com && cw"
   };
 
   # claude-sync integration: keep sessions synced with the R2 remote.
