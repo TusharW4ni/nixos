@@ -268,6 +268,9 @@ in
     o = "omp";
     ponder = "~/.claude/skills/ponder/scripts/ponder.sh";
     yazi = "y"; # the y wrapper cds into yazi's last directory on exit
+    "..." = "cd ../..";
+    "...." = "cd ../../..";
+    ava = "cd ~/w/app.avagolf.com";
   };
 
   # claude-sync integration: keep sessions synced with the R2 remote.
