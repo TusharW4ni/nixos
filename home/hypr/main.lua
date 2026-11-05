@@ -234,3 +234,12 @@ bind("XF86AudioLowerVolume", run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), "
 bind("XF86AudioMute", run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), "Mute", { locked = true })
 bind("XF86MonBrightnessUp", run("brightnessctl set 5%+"), "Brightness up", held)
 bind("XF86MonBrightnessDown", run("brightnessctl set 5%-"), "Brightness down", held)
+
+-- Hex dictation (programs.hex in home/tushar.nix). Hyprland's GlobalShortcuts
+-- portal grants Hex the shortcut without a key, so the key recorded in Hex's
+-- Settings is ignored and the bind has to live here. Shift+Space: Hex waits
+-- for the shortcut's release before pasting, so Shift is up by then. F10 has
+-- no modifier for the same reason (Hyprland merges held modifiers into the
+-- paste; Alt also leaks to Electron menus).
+bind("SHIFT + SPACE", hl.dsp.global("anomaly.hex:dictation"), "Dictate (Hex)")
+bind("F10", hl.dsp.global("anomaly.hex:paste-last"), "Paste last dictation (Hex)")

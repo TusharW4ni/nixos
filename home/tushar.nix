@@ -245,6 +245,10 @@ in
     enable = true;
     autostart = true;
     installModel = true;
+    # Hyprland ignores this key (its GlobalShortcuts portal grants the
+    # shortcut without one; the real bind is in home/hypr/main.lua). Kept in
+    # sync so Hex's Settings shows the key that actually dictates.
+    shortcut = "shift+space";
   };
 
   nix.gc = {
