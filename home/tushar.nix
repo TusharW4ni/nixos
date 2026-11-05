@@ -67,6 +67,7 @@ in
 {
   imports = [
     ./omp.nix
+    inputs.hex.homeManagerModules.default
     inputs.nixvim.homeModules.nixvim
     # nixvim config sourced from the nvim repo's nixvim branch (see flake input)
     "${inputs.nvim-config}/nvim.nix"
@@ -233,6 +234,18 @@ in
   };
 
   programs.lazygit.enable = true;
+
+  # Hex local voice dictation (github:anomalyco/hex). The module installs the
+  # package and runs `hex service` as a systemd user service bound to
+  # graphical-session.target (active under both Hyprland and Plasma here).
+  # installModel downloads the selected transcription model from a one-shot
+  # user service once the network is up; drop it to install the model by hand
+  # with `hex model install`.
+  programs.hex = {
+    enable = true;
+    autostart = true;
+    installModel = true;
+  };
 
   nix.gc = {
     automatic = true;
