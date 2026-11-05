@@ -237,9 +237,7 @@ bind("XF86MonBrightnessDown", run("brightnessctl set 5%-"), "Brightness down", h
 
 -- Hex dictation (programs.hex in home/tushar.nix). Hyprland's GlobalShortcuts
 -- portal grants Hex the shortcut without a key, so the key recorded in Hex's
--- Settings is ignored and the bind has to live here. Shift+Space: Hex waits
--- for the shortcut's release before pasting, so Shift is up by then. F10 has
--- no modifier for the same reason (Hyprland merges held modifiers into the
--- paste; Alt also leaks to Electron menus).
+-- Settings is ignored and the bind has to live here. Hex waits for the
+-- shortcut's release before pasting, so the modifiers are up by then.
 bind("SHIFT + SPACE", hl.dsp.global("anomaly.hex:dictation"), "Dictate (Hex)")
-bind("F10", hl.dsp.global("anomaly.hex:paste-last"), "Paste last dictation (Hex)")
+bind("CTRL + ALT + V", hl.dsp.global("anomaly.hex:paste-last"), "Paste last dictation (Hex)")
