@@ -277,3 +277,17 @@ bind("XF86MonBrightnessDown", run("brightnessctl set 5%-"), "Brightness down", h
 -- shortcut's release before pasting, so the modifiers are up by then.
 bind("CTRL + SHIFT + SPACE", hl.dsp.global("anomaly.hex:dictation"), "Dictate (Hex)")
 bind("CTRL + ALT + V", hl.dsp.global("anomaly.hex:paste-last"), "Paste last dictation (Hex)")
+
+-- Google Chrome tab navigation: Ctrl + Alt + Left/Right -> Ctrl + PageUp/PageDown
+bind("CTRL + ALT + left", function()
+  local w = hl.get_active_window()
+  if w and w.class == "google-chrome" then
+    hl.dispatch(hl.dsp.send_shortcut({ mod = "CTRL", key = "Page_Up" }))
+  end
+end, "Previous tab (Chrome)")
+bind("CTRL + ALT + right", function()
+  local w = hl.get_active_window()
+  if w and w.class == "google-chrome" then
+    hl.dispatch(hl.dsp.send_shortcut({ mod = "CTRL", key = "Page_Down" }))
+  end
+end, "Next tab (Chrome)")
