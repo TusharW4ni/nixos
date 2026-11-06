@@ -67,6 +67,7 @@ in
 {
   imports = [
     ./omp.nix
+    inputs.hex.homeManagerModules.default
     inputs.nixvim.homeModules.nixvim
     # nixvim config sourced from the nvim repo's nixvim branch (see flake input)
     "${inputs.nvim-config}/nvim.nix"
@@ -233,6 +234,22 @@ in
   };
 
   programs.lazygit.enable = true;
+
+  # Hex local voice dictation (github:anomalyco/hex). The module installs the
+  # package and runs `hex service` as a systemd user service bound to
+  # graphical-session.target (active under both Hyprland and Plasma here).
+  # installModel downloads the selected transcription model from a one-shot
+  # user service once the network is up; drop it to install the model by hand
+  # with `hex model install`.
+  programs.hex = {
+    enable = true;
+    autostart = true;
+    installModel = true;
+    # Hyprland ignores this key (its GlobalShortcuts portal grants the
+    # shortcut without one; the real bind is in home/hypr/main.lua). Kept in
+    # sync so Hex's Settings shows the key that actually dictates.
+    shortcut = "ctrl+shift+space";
+  };
 
   nix.gc = {
     automatic = true;

@@ -270,3 +270,10 @@ bind("XF86AudioLowerVolume", run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), "
 bind("XF86AudioMute", run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), "Mute", { locked = true })
 bind("XF86MonBrightnessUp", run("brightnessctl set 5%+"), "Brightness up", held)
 bind("XF86MonBrightnessDown", run("brightnessctl set 5%-"), "Brightness down", held)
+
+-- Hex dictation (programs.hex in home/tushar.nix). Hyprland's GlobalShortcuts
+-- portal grants Hex the shortcut without a key, so the key recorded in Hex's
+-- Settings is ignored and the bind has to live here. Hex waits for the
+-- shortcut's release before pasting, so the modifiers are up by then.
+bind("CTRL + SHIFT + SPACE", hl.dsp.global("anomaly.hex:dictation"), "Dictate (Hex)")
+bind("CTRL + ALT + V", hl.dsp.global("anomaly.hex:paste-last"), "Paste last dictation (Hex)")
