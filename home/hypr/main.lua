@@ -140,22 +140,45 @@ for n = 0, 9 do
   end
 end
 
--- Step through the open workspaces of the current group, wrapping around.
+-- The open workspace `step` away in the current group, wrapping around.
+local function open_neighbor(step)
+  local cur = hl.get_active_workspace()
+  if not cur or cur.id < 1 then return end
+  local ids = {}
+  for _, ws in ipairs(hl.get_workspaces()) do
+    if ws.id >= 1 and group_of(ws.id) == group_of(cur.id) then ids[#ids + 1] = ws.id end
+  end
+  table.sort(ids)
+  for i, id in ipairs(ids) do
+    if id == cur.id then return ids[(i - 1 + step) % #ids + 1] end
+  end
+end
+
 local function cycle(step)
   return function()
-    local cur = hl.get_active_workspace()
-    if not cur or cur.id < 1 then return end
-    local ids = {}
-    for _, ws in ipairs(hl.get_workspaces()) do
-      if ws.id >= 1 and group_of(ws.id) == group_of(cur.id) then ids[#ids + 1] = ws.id end
-    end
-    table.sort(ids)
-    for i, id in ipairs(ids) do
-      if id == cur.id then
-        return hl.dispatch(hl.dsp.focus({ workspace = ids[(i - 1 + step) % #ids + 1] }))
-      end
-    end
+    local id = open_neighbor(step)
+    if id then hl.dispatch(hl.dsp.focus({ workspace = id })) end
   end
+end
+
+-- The nearest monitor in a direction from the focused one, by centre point.
+-- Hyprland's monitor selectors take no direction, so it is worked out here.
+local function monitor_toward(dir)
+  local cur
+  for _, m in ipairs(hl.get_monitors()) do
+    if m.focused then cur = m end
+  end
+  if not cur then return end
+  local best, best_dist
+  for _, m in ipairs(hl.get_monitors()) do
+    local dx = (m.x + m.width / 2) - (cur.x + cur.width / 2)
+    local dy = (m.y + m.height / 2) - (cur.y + cur.height / 2)
+    local dist, off = -dx, dy
+    if dir == "right" then dist = dx elseif dir == "up" then dist, off = -dy, dx elseif dir == "down" then dist, off = dy, dx end
+    -- off-axis drift (mismatched heights) must not count as the direction
+    if dist > math.abs(off) and (not best or dist < best_dist) then best, best_dist = m, dist end
+  end
+  return best
 end
 
 -- Float workspaces: Super + Shift + F toggles the current workspace between
@@ -203,6 +226,18 @@ end, "Toggle float-only mode for this workspace")
 bind(mod .. " + TAB", hl.dsp.focus({ workspace = "previous" }), "Previous workspace (toggle)")
 bind(mod .. " + bracketleft", cycle(-1), "Previous open workspace in this group")
 bind(mod .. " + bracketright", cycle(1), "Next open workspace in this group")
+for dir, step in pairs({ left = -1, right = 1 }) do
+  bind(mod .. " + SHIFT + " .. dir, function()
+    local id = open_neighbor(step)
+    if id then hl.dispatch(hl.dsp.window.move({ workspace = id })) end
+  end, "Move window to " .. (step < 0 and "previous" or "next") .. " open workspace in this group")
+end
+for _, dir in ipairs({ "left", "right", "up", "down" }) do
+  bind(mod .. " + ALT + " .. dir, function()
+    local ws, m = hl.get_active_workspace(), monitor_toward(dir)
+    if ws and m then hl.dispatch(hl.dsp.workspace.move({ workspace = ws.id, monitor = m.name })) end
+  end, "Move workspace to monitor " .. dir)
+end
 
 -- Super + drag to move / resize windows
 bind(mod .. " + mouse:272", hl.dsp.window.drag(), "Move window (drag)", { mouse = true })
@@ -235,10 +270,3 @@ bind("XF86AudioLowerVolume", run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), "
 bind("XF86AudioMute", run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), "Mute", { locked = true })
 bind("XF86MonBrightnessUp", run("brightnessctl set 5%+"), "Brightness up", held)
 bind("XF86MonBrightnessDown", run("brightnessctl set 5%-"), "Brightness down", held)
-
--- Hex dictation (programs.hex in home/tushar.nix). Hyprland's GlobalShortcuts
--- portal grants Hex the shortcut without a key, so the key recorded in Hex's
--- Settings is ignored and the bind has to live here. Hex waits for the
--- shortcut's release before pasting, so the modifiers are up by then.
-bind("SHIFT + SPACE", hl.dsp.global("anomaly.hex:dictation"), "Dictate (Hex)")
-bind("CTRL + ALT + V", hl.dsp.global("anomaly.hex:paste-last"), "Paste last dictation (Hex)")

@@ -68,6 +68,15 @@ in
 
   wayland.windowManager.hyprland.extraLuaFiles.hub = ./hypr/hub.lua;
 
+  # hub > audio: only devices and per-app volume, no level meters, capped at 100%.
+  xdg.configFile."wiremix/wiremix.toml".text = ''
+    tab = "output"
+    tabs = ["output", "playback", "input"]
+    peaks = "off"
+    max_volume_percent = 100.0
+    enforce_max_volume = true
+  '';
+
   vicinaeScripts = {
     hub-wifi = section "wifi" "Wi-Fi";
     hub-bluetooth = section "bluetooth" "Bluetooth";

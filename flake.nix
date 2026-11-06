@@ -28,14 +28,6 @@
       flake = false;
     };
     herdr.url = "github:herdrdev/herdr/v0.9.0";
-    # Hex local voice dictation. Upstream flake: builds the Rust binary and
-    # ships a home-manager module (systemd user service + settings). Wired up
-    # via programs.hex in home/tushar.nix.
-    hex = {
-      url = "github:anomalyco/hex";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, ... }: {
