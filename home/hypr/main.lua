@@ -76,6 +76,7 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("google-chrome-stable --profile-directory=Default", { workspace = 2 }) -- parone.com profile
   hl.exec_cmd("slack", { workspace = 3, float = true })
   hl.exec_cmd("discord", { workspace = 3, float = true })
+  hl.exec_cmd("obsidian", { workspace = 4 })
 end)
 
 ------------------------------------------------------------------------------
