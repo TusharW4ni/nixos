@@ -13,6 +13,9 @@ in
 {
   home.packages = [ ql ];
 
+  # Auto-mount plugged-in drives at /run/media/<user>/<label> (`g m` in yazi).
+  services.udiskie = { enable = true; tray = "never"; };
+
   programs.yazi = {
     enable = true; # shell wrapper `y` cds to the last directory on exit
     plugins.mime-ext = pkgs.yaziPlugins.mime-ext;
@@ -30,6 +33,7 @@ in
     keymap.mgr.prepend_keymap = [
       { on = "<Space>"; run = "shell --orphan -- ql %h"; desc = "Quick look (full screen)"; }
       { on = "i"; run = [ "toggle" "arrow 1" ]; desc = "Toggle selection"; }
+      { on = [ "g" "m" ]; run = "cd /run/media/${config.home.username}"; desc = "Go to mounted drives"; }
     ];
 
     theme = {
