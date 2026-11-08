@@ -23,6 +23,13 @@
 
   networking.hostName = "nixos-vivobook";
 
+  # SSH reachable over Tailscale only, not on LAN/public Wi-Fi.
+  services.openssh = {
+    enable = true;
+    openFirewall = false;
+  };
+  networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 22 ];
+
   users.users.tushar = {
     isNormalUser = true;
     description = "tushar";
