@@ -72,6 +72,10 @@
   hardware.graphics.extraPackages = [ pkgs.intel-media-driver ];
   environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
 
+  # Mac-formatted (APFS) drives. Out-of-tree driver; mounts read-only unless
+  # given the `readwrite` option, which upstream calls experimental.
+  boot.supportedFilesystems.apfs = true;
+
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   system.stateVersion = "26.05";
