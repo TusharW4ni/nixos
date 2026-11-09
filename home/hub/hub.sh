@@ -232,6 +232,31 @@ gdrive_menu() {
   done
 }
 
+# ------------------------------------------------------------------- drives
+# USB drives udiskie mounted under /run/media/$USER. Eject unmounts, then
+# powers the disk off so it's safe to pull.
+drives_menu() {
+  local c dev ds
+  while :; do
+    mapfile -t ds < <(lsblk -Jpo PATH,MOUNTPOINT | jq -r --arg r "/run/media/$USER/" \
+      '.. | objects | select((.mountpoint // "") | startswith($r)) | "\(.path) · \(.mountpoint | split("/") | last)"')
+    (( ${#ds[@]} )) || { oops "no drives mounted"; return; }
+    c=$(pick "drives: ${#ds[@]} mounted" "${ds[@]}") || return
+    dev=${c%% *}
+    c=$(pick "$c" "open in yazi" "eject · udisksctl unmount + power-off") || continue
+    case $c in
+      open*) yazi "$(lsblk -no MOUNTPOINT "$dev")" ;;
+      eject*)
+        if udisksctl unmount -b "$dev" >/dev/null; then
+          udisksctl power-off -b "$(lsblk -npo PKNAME "$dev")" 2>/dev/null # fails if another partition is still mounted
+          gum style --foreground 10 "safe to remove"; sleep 1.2
+        else
+          oops "unmount failed: close anything using the drive"
+        fi ;;
+    esac
+  done
+}
+
 # --------------------------------------------------------------------- disk
 # Each entry names the tool it runs, so the command is there to learn.
 disk_menu() {
@@ -308,6 +333,7 @@ run() {
     syncthing) syncthing_menu ;;
     docker) lazydocker; refresh ;;
     gdrive) gdrive_menu ;;
+    drives) drives_menu ;;
     disk) disk_menu ;;
     calendar) calendar ;;
     *) oops "unknown section: $1"; return 1 ;;
@@ -323,6 +349,6 @@ if [[ $# -gt 0 ]]; then
   exit
 fi
 while c=$(pick "hub" wifi bluetooth audio displays brightness nightlight autolock power keys services \
-  tailscale syncthing docker gdrive disk); do
+  tailscale syncthing docker gdrive drives disk); do
   run "$c"
 done
