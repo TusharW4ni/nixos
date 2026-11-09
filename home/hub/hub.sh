@@ -260,24 +260,35 @@ drives_menu() {
 # --------------------------------------------------------------------- disk
 # Each entry names the tool it runs, so the command is there to learn.
 disk_menu() {
-  local c dev used
+  local c dev mnt used disks
   pause() { gum style --foreground 8 "press any key"; read -rsn1 -r _; }
   sure() { gum confirm "$1?" --default=false; }
-  dev=/dev/$(lsblk -dno NAME,TYPE | awk '$2 == "disk" { print $1; exit }')
+  dev=/dev/$(lsblk -no PKNAME "$(findmnt -no SOURCE /)") # start on the disk holding /
   while :; do
-    used=$(df -h --output=used,size,pcent / | awk 'NR == 2 { printf "%s of %s used (%s)", $1, $2, $3 }')
-    c=$(pick "disk: $used" \
+    # Where the disk is mounted: / if it holds root, else its first mount.
+    mnt=$(lsblk -Jo MOUNTPOINT "$dev" | jq -r '[.. | objects | .mountpoint? // empty | select(startswith("/"))]
+      | if any(. == "/") then "/" else .[0] // "" end')
+    if [[ -n $mnt ]]; then
+      used=$(df -h --output=used,size,pcent "$mnt" | awk 'NR == 2 { printf "%s of %s used (%s)", $1, $2, $3 }')
+    else
+      used="not mounted"
+    fi
+    c=$(pick "disk: $dev · $used" \
+      "pick disk · lsblk" \
       "overview · duf" \
       "space in home · gdu ~" \
-      "space everywhere · gdu /" \
+      "space on disk · gdu ${mnt:-?}" \
       "health · smartctl -a $dev" \
       "docker space · docker system df" \
       "clean docker · docker system prune" \
       "clean nix · nix-collect-garbage") || return
     case $c in
+      "pick disk"*)
+        mapfile -t disks < <(lsblk -dnpo PATH,TYPE,SIZE,MODEL | awk '$2 == "disk" && $1 !~ /zram/ { $2 = ""; print }')
+        c=$(pick "pick disk" "${disks[@]}") && dev=${c%% *} ;;
       overview*) clear; duf --only local; pause ;;
       "space in home"*) gdu "$HOME" ;;
-      "space everywhere"*) gdu / ;;
+      "space on disk"*) if [[ -n $mnt ]]; then gdu "$mnt"; else oops "$dev is not mounted"; fi ;;
       health*) clear; sudo "$(command -v smartctl)" -a "$dev" | gum pager ;;
       "docker space"*) clear; docker system df; pause ;;
       "clean docker"*) sure "remove stopped containers and images + build cache unused for a week" \
