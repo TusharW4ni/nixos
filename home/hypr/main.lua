@@ -88,8 +88,6 @@ bind(mod .. " + Q", run("ghostty"), "Terminal")
 bind(mod .. " + SPACE", run("vicinae toggle"), "Launcher (apps, calc, f files, v clipboard, c Claude)")
 bind(mod .. " + SHIFT + V", run("vicinae deeplink vicinae://launch/clipboard/history"), "Clipboard history")
 bind(mod .. " + C", hl.dsp.window.close(), "Close window")
-bind(mod .. " + F", hl.dsp.window.fullscreen(), "Fullscreen")
-bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }), "Toggle floating")
 
 -- Focus
 for _, step in ipairs({ { "ALT + TAB", true, "Next" }, { "ALT + SHIFT + TAB", false, "Previous" } }) do
@@ -187,7 +185,7 @@ local function monitor_toward(dir)
   return best
 end
 
--- Float workspaces: Super + Shift + F toggles the current workspace between
+-- Float workspaces: v in workspace mode (Super + E) toggles the current workspace between
 -- tiling and float-only. Every window opened on or moved to a float workspace
 -- floats. The set is kept in a mutable state file outside the repo so it
 -- survives reloads.
@@ -213,7 +211,7 @@ end
 hl.on("window.open", float_all)
 hl.on("window.move_to_workspace", float_all)
 
-bind(mod .. " + SHIFT + F", function()
+local function toggle_float_workspace()
   local ws = hl.get_active_workspace()
   if not ws then return end
   local on = not float_ws[ws.id]
@@ -227,7 +225,7 @@ bind(mod .. " + SHIFT + F", function()
     for id in pairs(float_ws) do out:write(id, "\n") end
     out:close()
   end
-end, "Toggle float-only mode for this workspace")
+end
 
 bind(mod .. " + TAB", hl.dsp.focus({ workspace = "previous" }), "Previous workspace (toggle)")
 bind(mod .. " + bracketleft", cycle(-1), "Previous open workspace in this group")
@@ -256,8 +254,10 @@ end
 -- workspace. A mode stays on until Esc or Enter; the bar shows which.
 --   window:    hjkl move (floats nudge by 40px), Shift + hjkl resize,
 --              `/1-9 send to a slot in this group, Ctrl + `/1-9 to a group,
---              [ ] to the previous/next open workspace, p pin to every workspace
---   workspace: hjkl move this workspace to the monitor in that direction
+--              [ ] to the previous/next open workspace, p pin to every workspace,
+--              f fullscreen, m maximize, v float/tile
+--   workspace: hjkl move this workspace to the monitor in that direction,
+--              v float-only mode
 local nudge = 40
 local function leave_mode()
   bind("Escape", hl.dsp.submap("reset"), "Leave mode")
@@ -286,6 +286,9 @@ hl.define_submap("window", function()
     bind(key, window_to_slot(n == 0 and 10 or n), "Move window to slot " .. label .. " in this group")
     bind("CTRL + " .. key, window_to_group(n), "Move window to workspace group " .. label)
   end
+  bind("F", hl.dsp.window.fullscreen(), "Fullscreen (toggle)")
+  bind("M", hl.dsp.window.fullscreen({ mode = "maximized" }), "Maximize (toggle)")
+  bind("V", hl.dsp.window.float({ action = "toggle" }), "Float / tile window")
   bind("bracketleft", window_to_neighbor(-1), "Move window to previous open workspace in this group")
   bind("bracketright", window_to_neighbor(1), "Move window to next open workspace in this group")
   -- Hyprland only pins floating windows: float a tiled one first, and put
@@ -313,6 +316,7 @@ hl.define_submap("workspace", function()
   for _, d in ipairs(hjkl) do
     bind(d[1], workspace_toward(d[2]), "Move workspace to monitor " .. d[2])
   end
+  bind("V", toggle_float_workspace, "Toggle float-only mode for this workspace")
   leave_mode()
 end)
 
