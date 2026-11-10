@@ -230,6 +230,14 @@ in
           done
           printf '%s<span foreground="#5c5c5c">%s</span>\n' "''${l:0:settled}" "$noise"
         '';
+        # A dim ASCII garden along the bottom, behind everything: a loop
+        # baked once (pkgs/ascii-garden.py), this just cats the frame for
+        # the wall clock's current 100ms.
+        garden = pkgs.writeShellScript "hyprlock-garden" ''
+          d=${pkgs.callPackage ../pkgs/ascii-garden.nix { }}
+          f=("$d"/*.txt) t=''${EPOCHREALTIME/./}
+          exec ${pkgs.coreutils}/bin/cat "$d/$(( t / 100000 % ''${#f[@]} )).txt"
+        '';
         text = {
           monitor = "";
           font_family = "JetBrains Mono";
@@ -260,6 +268,7 @@ in
             halign = "center";
             valign = "top";
           }
+          { text = "cmd[update:100] ${garden}"; font_size = 8; text_align = "left"; halign = "center"; valign = "bottom"; zindex = -1; }
           { text = "cmd[update:100] ${story}"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
           # The field is faded out after a failed attempt (it's empty), so
           # the failure gets its own label.
