@@ -288,7 +288,24 @@ hl.define_submap("window", function()
   end
   bind("bracketleft", window_to_neighbor(-1), "Move window to previous open workspace in this group")
   bind("bracketright", window_to_neighbor(1), "Move window to next open workspace in this group")
-  bind("P", hl.dsp.window.pin(), "Pin window to every workspace (toggle)")
+  -- Hyprland only pins floating windows: float a tiled one first, and put
+  -- it back in the layout when unpinned.
+  local floated_for_pin = {} -- window address -> true; resets on reload
+  bind("P", function()
+    local w = hl.get_active_window()
+    if not w then return end
+    if w.pinned then
+      hl.dispatch(hl.dsp.window.pin())
+      if floated_for_pin[w.address] then hl.dispatch(hl.dsp.window.float({ action = "unset" })) end
+      floated_for_pin[w.address] = nil
+    else
+      if not w.floating then
+        hl.dispatch(hl.dsp.window.float({ action = "set" }))
+        floated_for_pin[w.address] = true
+      end
+      hl.dispatch(hl.dsp.window.pin())
+    end
+  end, "Pin window to every workspace (toggle)")
   leave_mode()
 end)
 bind(mod .. " + E", hl.dsp.submap("workspace"), "Workspace mode")
