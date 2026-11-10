@@ -27,6 +27,12 @@
       url = "github:TusharW4ni/nvim/nixvim";
       flake = false;
     };
+    # Live systemd-job tree on the boot/shutdown console. Module enabled in
+    # modules/system/boot.nix.
+    bootvine = {
+      url = "git+https://codeberg.org/wvhulle/bootvine";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     herdr.url = "github:herdrdev/herdr/v0.9.0";
     # Hex local voice dictation. Upstream flake: builds the Rust binary and
     # ships a home-manager module (systemd user service + settings). Wired up

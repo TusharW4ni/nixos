@@ -1,7 +1,7 @@
 { pkgs, lib, inputs, config, ... }:
 let
   nixos-switch = pkgs.writeShellScriptBin "nixos-switch" ''
-    set -e
+    set -eo pipefail
     CONFIG_DIR="$HOME/nixos-config"
 
     cd "$CONFIG_DIR"
@@ -24,7 +24,9 @@ let
       COMMITTED=1
     fi
 
-    sudo nixos-rebuild switch --flake "$CONFIG_DIR#nixos-vivobook" "$@"
+    # nom (nix-output-monitor) draws the build as a live dependency tree.
+    sudo nixos-rebuild switch --flake "$CONFIG_DIR#nixos-vivobook" \
+      --log-format internal-json -v "$@" |& ${pkgs.nix-output-monitor}/bin/nom --json
 
     if [ -n "$COMMITTED" ]; then
       GENERATION=$(sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -1 | awk '{print $1}')
@@ -88,6 +90,7 @@ in
   home.packages = with pkgs; [
     claude # scope wrapper (above)
     nixos-switch
+    nix-output-monitor # `nom build`, `nom develop`, `nom shell` for ad-hoc builds
     devices
     # Playwright CLI wired to nixpkgs' own browsers (incl. WebKit); the
     # browsers Playwright downloads itself don't run on NixOS.
