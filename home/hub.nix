@@ -101,7 +101,7 @@ in
       "$suspend" = idle.suspend;
       source = "${config.xdg.stateHome}/hypridle/overrides.conf";
       general = {
-        lock_cmd = "pidof hyprlock || hyprlock";
+        lock_cmd = "pidof hyprlock || ${config.programs.hyprlock.package}/bin/hyprlock";
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = dpms "enable";
       };
@@ -141,8 +141,9 @@ in
     "f %h/.local/state/hypridle/overrides.conf - - - -"
   ];
 
-  # Lock screen: black, the top bar's clock where the bar would be, and
-  # a monologue centred, each line decoding in and scrambling out.
+  # Lock screen: a night sky (tonight's moon, stars, the odd shooting star)
+  # over an ASCII garden, the top bar's clock where the bar would be, and a
+  # monologue centred, each line decoding in and scrambling out.
   # Typing echoes nothing: the password field is a small ring under the name,
   # and hyprlock's hide_input lights a random quarter of it on every
   # keystroke, so it ticks like a spinner while you type and fades out when
@@ -150,6 +151,11 @@ in
   # can react to typing.)
   programs.hyprlock = {
     enable = true;
+    # Image reload_time in ms rather than seconds, so the garden and sky
+    # below can be animations.
+    package = pkgs.hyprlock.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ../pkgs/hyprlock-image-reload-ms.patch ];
+    });
     settings =
       let
         white = "rgb(e6e6e6)";
@@ -230,14 +236,30 @@ in
           done
           printf '%s<span foreground="#5c5c5c">%s</span>\n' "''${l:0:settled}" "$noise"
         '';
-        # A dim ASCII garden along the bottom, behind everything: a loop
-        # baked once (pkgs/ascii-garden.py), this just cats the frame for
-        # the wall clock's current 100ms.
-        garden = pkgs.writeShellScript "hyprlock-garden" ''
-          d=${pkgs.callPackage ../pkgs/ascii-garden.nix { }}
-          f=("$d"/*.txt) t=''${EPOCHREALTIME/./}
-          exec ${pkgs.coreutils}/bin/cat "$d/$(( t / 100000 % ''${#f[@]} )).txt"
+        # The garden, sky and moon are JPEGs baked once (pkgs/ascii-garden.py).
+        # `loop garden|sky` names that loop's frame for the wall clock's
+        # current 100ms; `moon` names tonight's phase, one of 30 steps through
+        # the synodic month (2551443s) counted from the new moon of
+        # 2000-01-06 18:14 UTC.
+        art = pkgs.callPackage ../pkgs/ascii-garden.nix { };
+        loop = pkgs.writeShellScript "hyprlock-loop" ''
+          f=(${art}/$1/*.jpg) t=''${EPOCHREALTIME/./}
+          echo "${art}/$1/$(( t / 100000 % ''${#f[@]} )).jpg"
         '';
+        moon = pkgs.writeShellScript "hyprlock-moon" ''
+          a=$(( (EPOCHSECONDS - 947182440) % 2551443 ))
+          echo "${art}/moon/$(( (a * 30 + 1275721) / 2551443 % 30 )).jpg"
+        '';
+        art-image = i: {
+          monitor = "";
+          path = "${art}/${i.dir}/0.jpg";
+          reload_time = 100; # ms, with the patch above
+          size = i.height; # the shorter side: native size
+          rounding = 0;
+          border_size = 0;
+          halign = "center";
+          zindex = -1;
+        } // removeAttrs i [ "dir" "height" ];
         text = {
           monitor = "";
           font_family = "JetBrains Mono";
@@ -254,7 +276,7 @@ in
           "inputFieldFade, 1, 3, out"
           "inputFieldColors, 1, 4, out"
         ];
-        background = [{ monitor = ""; color = "rgb(000000)"; }];
+        background = [{ monitor = ""; color = "rgb(000000)"; zindex = -3; }]; # under the sky (-2)
         label = map (l: text // l) [
           # Same as waybar's custom/clock (home/waybar.nix): format, font,
           # tabular digits, centred in the 34px bar. font_size is in points:
@@ -268,11 +290,20 @@ in
             halign = "center";
             valign = "top";
           }
-          { text = "cmd[update:100] ${garden}"; font_size = 8; text_align = "left"; halign = "center"; valign = "bottom"; zindex = -1; }
           { text = "cmd[update:100] ${story}"; color = white; position = "0, 12"; halign = "center"; valign = "center"; }
           # The field is faded out after a failed attempt (it's empty), so
           # the failure gets its own label.
           { text = ''<span foreground="##ff8080">$FAIL</span>''; color = white; position = "0, -56"; halign = "center"; valign = "center"; }
+        ];
+        # Each is opaque black around its glyphs: the sky's stars keep out of
+        # the moon's box (pkgs/ascii-garden.py's MOON_AT), and the garden
+        # draws over the sky's foot.
+        image = map art-image [
+          { dir = "sky"; height = 720; reload_cmd = "${loop} sky"; valign = "top"; zindex = -2; }
+          { dir = "garden"; height = 480; reload_cmd = "${loop} garden"; valign = "bottom"; }
+          # Checked twice a second: it only reloads when the phase moves on,
+          # but corrects the frame-0 new moon it starts on right away.
+          { dir = "moon"; height = 340; reload_cmd = "${moon}"; reload_time = 500; halign = "right"; valign = "top"; position = "-150, -60"; }
         ];
         input-field = [{
           monitor = "";
