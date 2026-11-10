@@ -12,7 +12,7 @@ divide the loop, so the last frame runs into the first.
 
 The sky is dim stars, twinkling, kept clear of the clock, the lock text and
 the moon's box, and two shooting stars per loop. The moon is a lit sphere
-with dark maria, a faint earthshine on its dark side and a glow that grows
+with dark maria, earthshine on its dark side and a glow that grows
 with how full it is.
 
   python3 ascii-garden.py FONT.ttf OUTDIR [FRAME...]  (FRAMEs: just those, for a look)
@@ -274,14 +274,16 @@ def moon(step):
                 [(-0.3, 0.35, 0.28, 0.6), (0.25, 0.3, 0.22, 0.55), (0.05, -0.05, 0.3, 0.45),
                  (-0.4, -0.25, 0.2, 0.5), (0.45, -0.4, 0.15, 0.45), (-0.1, 0.65, 0.12, 0.45)])
     albedo = (1 - np.clip(maria, 0, 0.65)) * (0.8 + 0.2 * hash01(i, j))
-    lit = np.clip((x * sun[0] + z * sun[2]) * 4, 0, 1) ** 0.7
-    b = np.where(inside, albedo * (0.07 + 0.93 * lit) * (0.7 + 0.3 * z), 0)
+    # The terminator nudged towards the dark side, and a strong earthshine:
+    # near new moon there's still a crescent and a ghost of the disc to see.
+    lit = np.clip((x * sun[0] + z * sun[2] + 0.25) * 4, 0, 1) ** 0.7
+    b = np.where(inside, albedo * (0.4 + 0.6 * lit) * (0.7 + 0.3 * z), 0)
     g = np.where(b > 0.03, RAMP[np.clip(((b - 0.1) / 0.85 * 9).astype(int), 0, 8)], GI[" "])
     rgb = np.array([235, 228, 205]) * np.maximum(b, 0.12)[..., None] * (b > 0.03)[..., None]
     img = draw(g, rgb, GLYPH_ATLAS)
     yy, xx = np.mgrid[0:MOON_ROWS * CH, 0:MOON_COLS * CW]
     d = np.hypot(xx - MOON_COLS * CW / 2, yy - MOON_ROWS * CH / 2) - R * CH
-    glow = (1 - np.cos(th)) / 2 * 30 * np.exp(-np.clip(d, 0, None) / 25) * (d > 0)
+    glow = (0.15 + 0.85 * (1 - np.cos(th)) / 2) * 30 * np.exp(-np.clip(d, 0, None) / 25) * (d > 0)
     return img + glow[..., None] * [0.85, 0.85, 0.8]
 
 
