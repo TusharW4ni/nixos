@@ -13,9 +13,9 @@ case "${1:-toggle}" in
     jq -nc --arg n "$n" --arg dnd "$dnd" '
       (if $n == "0" then "" else "  \($n)" end) as $count
       | if $dnd == "true" then
-          {text: ("<span font_family=\"lucide\">&#xe05a;</span>" + $count), class: "dnd", tooltip: "do not disturb · \($n) in the pane"}
+          {text: ("<span font_family=\"lucide\" rise=\"-1600\">&#xe05a;</span>" + $count), class: "dnd", tooltip: "do not disturb · \($n) in the pane"}
         else
-          {text: ("<span font_family=\"lucide\">&#xe059;</span>" + $count), class: (if $n == "0" then "empty" else "some" end), tooltip: "\($n) notifications"}
+          {text: ("<span font_family=\"lucide\" rise=\"-1600\">&#xe059;</span>" + $count), class: (if $n == "0" then "empty" else "some" end), tooltip: "\($n) notifications"}
         end'
     ;;
   toggle|clear|dnd|isDnd|count) ipc "$1" ;;
