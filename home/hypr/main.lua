@@ -59,6 +59,7 @@ hl.config({
 })
 
 hl.layer_rule({ name = "vicinae-no-anim", match = { namespace = "vicinae" }, no_anim = true })
+hl.layer_rule({ name = "notif-pane-no-anim", match = { namespace = "notif-pane" }, no_anim = true })
 
 ------------------------------------------------------------------------------
 -- Autostart
@@ -97,8 +98,9 @@ for _, step in ipairs({ { "ALT + TAB", true, "Next" }, { "ALT + SHIFT + TAB", fa
     hl.dispatch(hl.dsp.window.bring_to_top()) -- floats overlap; raise the focused one
   end, step[3] .. " window in this workspace")
 end
-for _, dir in ipairs({ "left", "right", "up", "down" }) do
-  bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), "Focus " .. dir)
+local hjkl = { { "H", "left" }, { "J", "down" }, { "K", "up" }, { "L", "right" } }
+for _, d in ipairs(hjkl) do
+  bind(mod .. " + " .. d[1], hl.dsp.focus({ direction = d[2] }), "Focus " .. d[2])
 end
 
 -- Workspaces: 10 groups of 10. Super + `/1-9 picks a slot in the current
@@ -119,6 +121,14 @@ local function current_group()
   return (ws and ws.id >= 1) and group_of(ws.id) or 0
 end
 local function group_target(n) return group_last[n] or n * 10 + 1 end
+local function window_to_slot(slot)
+  return function() hl.dispatch(hl.dsp.window.move({ workspace = current_group() * 10 + slot })) end
+end
+local function window_to_group(n)
+  return function()
+    if n ~= current_group() then hl.dispatch(hl.dsp.window.move({ workspace = group_target(n) })) end
+  end
+end
 
 local keypad = { [0] = 90, 87, 88, 89, 83, 84, 85, 79, 80, 81 } -- KP_0-9 keycodes
 for n = 0, 9 do
@@ -128,15 +138,11 @@ for n = 0, 9 do
     bind(mod .. " + " .. key, function()
       hl.dispatch(hl.dsp.focus({ workspace = current_group() * 10 + slot }))
     end, "Go to slot " .. label .. " in this group")
-    bind(mod .. " + SHIFT + " .. key, function()
-      hl.dispatch(hl.dsp.window.move({ workspace = current_group() * 10 + slot }))
-    end, "Move window to slot " .. label .. " in this group")
+    bind(mod .. " + SHIFT + " .. key, window_to_slot(slot), "Move window to slot " .. label .. " in this group")
     bind(mod .. " + CTRL + " .. key, function()
       hl.dispatch(hl.dsp.focus({ workspace = group_target(n) }))
     end, "Switch to workspace group " .. label)
-    bind(mod .. " + CTRL + SHIFT + " .. key, function()
-      if n ~= current_group() then hl.dispatch(hl.dsp.window.move({ workspace = group_target(n) })) end
-    end, "Move window to workspace group " .. label)
+    bind(mod .. " + CTRL + SHIFT + " .. key, window_to_group(n), "Move window to workspace group " .. label)
   end
 end
 
@@ -226,18 +232,72 @@ end, "Toggle float-only mode for this workspace")
 bind(mod .. " + TAB", hl.dsp.focus({ workspace = "previous" }), "Previous workspace (toggle)")
 bind(mod .. " + bracketleft", cycle(-1), "Previous open workspace in this group")
 bind(mod .. " + bracketright", cycle(1), "Next open workspace in this group")
-for dir, step in pairs({ left = -1, right = 1 }) do
-  bind(mod .. " + SHIFT + " .. dir, function()
+local function window_to_neighbor(step)
+  return function()
     local id = open_neighbor(step)
     if id then hl.dispatch(hl.dsp.window.move({ workspace = id })) end
-  end, "Move window to " .. (step < 0 and "previous" or "next") .. " open workspace in this group")
+  end
 end
-for _, dir in ipairs({ "left", "right", "up", "down" }) do
-  bind(mod .. " + ALT + " .. dir, function()
+local function workspace_toward(dir)
+  return function()
     local ws, m = hl.get_active_workspace(), monitor_toward(dir)
     if ws and m then hl.dispatch(hl.dsp.workspace.move({ workspace = ws.id, monitor = m.name })) end
-  end, "Move workspace to monitor " .. dir)
+  end
 end
+for dir, step in pairs({ left = -1, right = 1 }) do
+  bind(mod .. " + SHIFT + " .. dir, window_to_neighbor(step),
+    "Move window to " .. (step < 0 and "previous" or "next") .. " open workspace in this group")
+end
+for _, dir in ipairs({ "left", "right", "up", "down" }) do
+  bind(mod .. " + ALT + " .. dir, workspace_toward(dir), "Move workspace to monitor " .. dir)
+end
+
+-- Modes. Super + W acts on the focused window, Super + E on the whole
+-- workspace. A mode stays on until Esc or Enter; the bar shows which.
+--   window:    hjkl move (floats nudge by 40px), Shift + hjkl resize,
+--              `/1-9 send to a slot in this group, Ctrl + `/1-9 to a group,
+--              [ ] to the previous/next open workspace, p pin to every workspace
+--   workspace: hjkl move this workspace to the monitor in that direction
+local nudge = 40
+local function leave_mode()
+  bind("Escape", hl.dsp.submap("reset"), "Leave mode")
+  bind("Return", hl.dsp.submap("reset"), "Leave mode")
+end
+bind(mod .. " + W", hl.dsp.submap("window"), "Window mode")
+hl.define_submap("window", function()
+  for _, d in ipairs(hjkl) do
+    local dir = d[2]
+    local dx = dir == "left" and -nudge or dir == "right" and nudge or 0
+    local dy = dir == "up" and -nudge or dir == "down" and nudge or 0
+    bind(d[1], function()
+      local w = hl.get_active_window()
+      if w and w.floating then
+        hl.dispatch(hl.dsp.window.move({ x = dx, y = dy, relative = true }))
+      else
+        hl.dispatch(hl.dsp.window.move({ direction = dir }))
+      end
+    end, "Move window " .. dir, { repeating = true })
+    -- l/j grow, h/k shrink
+    bind("SHIFT + " .. d[1], hl.dsp.window.resize({ x = dx, y = dy, relative = true }),
+      "Resize window " .. dir, { repeating = true })
+  end
+  for n = 0, 9 do
+    local key, label = n == 0 and "grave" or tostring(n), n == 0 and "`" or tostring(n)
+    bind(key, window_to_slot(n == 0 and 10 or n), "Move window to slot " .. label .. " in this group")
+    bind("CTRL + " .. key, window_to_group(n), "Move window to workspace group " .. label)
+  end
+  bind("bracketleft", window_to_neighbor(-1), "Move window to previous open workspace in this group")
+  bind("bracketright", window_to_neighbor(1), "Move window to next open workspace in this group")
+  bind("P", hl.dsp.window.pin(), "Pin window to every workspace (toggle)")
+  leave_mode()
+end)
+bind(mod .. " + E", hl.dsp.submap("workspace"), "Workspace mode")
+hl.define_submap("workspace", function()
+  for _, d in ipairs(hjkl) do
+    bind(d[1], workspace_toward(d[2]), "Move workspace to monitor " .. d[2])
+  end
+  leave_mode()
+end)
 
 -- Super + drag to move / resize windows
 bind(mod .. " + mouse:272", hl.dsp.window.drag(), "Move window (drag)", { mouse = true })
@@ -254,8 +314,8 @@ bind(mod .. " + R", run("screenrec monitor"), "Record monitor")
 
 -- Notifications
 bind(mod .. " + D", run("dnd"), "Toggle do not disturb")
-bind(mod .. " + N", run("makoctl restore"), "Restore last notification")
-bind(mod .. " + SHIFT + N", run("makoctl dismiss -a"), "Dismiss all notifications")
+bind(mod .. " + N", run("notif toggle"), "Notification pane")
+bind(mod .. " + SHIFT + N", run("notif clear"), "Dismiss all notifications")
 
 -- Media keys (also on the lock screen)
 bind("XF86AudioPlay", run("media play-pause"), "Play / pause", { locked = true })

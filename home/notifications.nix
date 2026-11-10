@@ -1,49 +1,28 @@
-# Notifications: black mako banners that never auto-dismiss (except Ghostty,
-# herdr and screenshots, 5 s), manual DND,
-# screenshot/media banners, and low-battery alerts.
+# Notifications: Quickshell banners that decay into a persistent pane
+# (Super+N), manual DND, screenshot/media banners, and low-battery alerts.
 { pkgs, ... }:
 let
   script = name: runtimeInputs: pkgs.writeShellApplication {
     inherit name runtimeInputs;
     text = builtins.readFile ./scripts/${name}.sh;
   };
-  dnd = script "dnd" (with pkgs; [ mako jq pulseaudio procps gnugrep ]);
+  notif = script "notif" (with pkgs; [ quickshell jq ]);
+  dnd = script "dnd" ([ notif ] ++ (with pkgs; [ jq pulseaudio gnugrep ]));
   shot = script "shot" (with pkgs; [ grim slurp wl-clipboard jq libnotify satty util-linux coreutils ]);
   media = script "media" (with pkgs; [ playerctl libnotify coreutils ]);
 in
 {
-  home.packages = [ dnd shot media pkgs.libnotify pkgs.playerctl ];
+  home.packages = [ notif dnd shot media pkgs.libnotify pkgs.playerctl ];
 
-  services.mako = {
+  # Banners, the pane and the notification server: ./quickshell/shell.qml.
+  programs.quickshell = {
     enable = true;
-    settings = {
-      font = "Atkinson Hyperlegible Next 11";
-      background-color = "#000000";
-      text-color = "#e6e6e6";
-      border-color = "#333333";
-      border-size = 1;
-      border-radius = 0;
-      padding = "10,14";
-      margin = 8;
-      width = 380;
-      max-icon-size = 96;
-      layer = "overlay";
-      default-timeout = 0; # never auto-dismiss
-      ignore-timeout = 1;  # ...even when the app asks for a timeout
-      history = 1;
-      max-history = 100;
-      "urgency=critical" = { border-color = "#ff8080"; };
-      # GLib sends Ghostty's banners with an empty app-name; match its app id.
-      "desktop-entry=com.mitchellh.ghostty" = { default-timeout = 5000; };
-      "app-name=screenshot" = { default-timeout = 5000; };
-      # herdr toasts ("claude finished") shell out to notify-send without -a.
-      "app-name=notify-send" = { default-timeout = 5000; };
-      # DND hides banners; they reappear when DND ends. Critical ones
-      # (low battery) still show.
-      "mode=dnd" = { invisible = 1; };
-      "mode=dnd urgency=critical" = { invisible = 0; };
-    };
+    configs.shell = ./quickshell;
+    activeConfig = "shell";
+    systemd.enable = true;
   };
+  systemd.user.services.quickshell.Unit.PartOf = [ "graphical-session.target" ];
+  systemd.user.tmpfiles.rules = [ "d %h/.local/state/notifications/img - - - -" ];
 
   # Keeps Slack/Discord streams muted while DND is on. Supervised, so it
   # comes back if pipewire-pulse restarts (`pactl subscribe` exits with it).

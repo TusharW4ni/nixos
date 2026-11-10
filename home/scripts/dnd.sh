@@ -1,11 +1,11 @@
-# dnd [toggle|watch|status]: manual do-not-disturb.
-#   toggle  flip mako's dnd mode; mute/unmute Slack and Discord sounds; refresh the bar (signal 8)
+# dnd [toggle|watch]: manual do-not-disturb.
+#   toggle  flip the pane's DND (banners hidden, notifications still collect);
+#           mute/unmute Slack and Discord sounds. The pane refreshes the bar.
 #   watch   long-running: mute Slack/Discord streams created while DND is on
-#   status  waybar JSON (empty text = module hidden)
 # Discord call audio ("WEBRTC VoiceEngine") and the browser are never muted.
 apps='^(slack|\.Discord-wrapped)$'
 
-active() { makoctl mode | grep -qx dnd; }
+active() { [ "$(notif isDnd)" = true ]; }
 
 mute_apps() {
   pactl -f json list sink-inputs \
@@ -18,22 +18,11 @@ mute_apps() {
 
 case "${1:-toggle}" in
   toggle)
-    makoctl mode -t dnd >/dev/null
-    if active; then mute_apps 1; else mute_apps 0; fi
-    pkill -RTMIN+8 waybar || true
+    if [ "$(notif dnd)" = true ]; then mute_apps 1; else mute_apps 0; fi
     ;;
   watch)
     pactl subscribe | grep --line-buffered "'new' on sink-input" \
       | while read -r _; do if active; then mute_apps 1; fi; done
     ;;
-  status)
-    if active; then
-      n=$(makoctl list -j | jq length)
-      jq -nc --arg n "$n" \
-        '{text: ("<span font_family=\"lucide\">&#xe05a;</span>" + (if $n == "0" then "" else "  \($n)" end)), class: "on", tooltip: "do not disturb · \($n) hidden"}'
-    else
-      echo '{"text": ""}'
-    fi
-    ;;
-  *) echo "usage: dnd [toggle|watch|status]" >&2; exit 1 ;;
+  *) echo "usage: dnd [toggle|watch]" >&2; exit 1 ;;
 esac

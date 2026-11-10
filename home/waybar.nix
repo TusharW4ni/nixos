@@ -1,6 +1,6 @@
 # Status bar: pure black, Atkinson Hyperlegible Next, thin Lucide line icons.
 # Approved look: docs/superpowers/specs/2026-10-19-hyprland-polish-research/bar-mockup.html (variant C).
-# Signals: 8 = DND (dnd toggle refreshes it), 9 = mic, 10 = service icons.
+# Signals: 8 = notifications (the pane refreshes it), 9 = mic, 10 = service icons.
 { pkgs, config, ... }:
 let
   # Lucide maps letters and digits to icons too, so it's only ever used
@@ -53,14 +53,14 @@ in
       position = "top";
       height = 34;
       modules-left = [ "hyprland/workspaces" ];
-      modules-center = [ "custom/clock" ];
+      modules-center = [ "custom/clock" "hyprland/submap" ];
       modules-right = [
         "custom/tailscale"
         "custom/syncthing"
         "custom/docker"
         "custom/gdrive"
         "custom/recording"
-        "custom/dnd"
+        "custom/notif"
         "custom/mic"
         "backlight"
         "pulseaudio"
@@ -86,13 +86,21 @@ in
         interval = 1;
         on-click = "screenrec";
       };
-      # Amber bell-off + hidden count while DND is on, hidden otherwise.
-      "custom/dnd" = {
-        exec = "dnd status";
+      # Bell + how many notifications are in the pane (dim bell when none),
+      # amber bell-off while DND is on. Click opens the pane, right click
+      # toggles DND.
+      "custom/notif" = {
+        exec = "notif status";
         return-type = "json";
-        interval = 2; # keeps the hidden count fresh
+        interval = 5; # fallback; the pane signals on every change
         signal = 8;
-        on-click = "dnd";
+        on-click = "notif toggle";
+        on-click-right = "dnd";
+      };
+      # Window / workspace mode (Super+W / Super+E), hidden otherwise.
+      "hyprland/submap" = {
+        format = "{}";
+        tooltip = false;
       };
       # Always visible: dim when idle, red while an app is capturing, mic-off when muted.
       "custom/mic" = {
@@ -193,11 +201,13 @@ in
       #battery.critical:not(.charging) {
         color: #ff8080;
       }
-      #custom-dnd,
+      #custom-notif.dnd,
+      #submap,
       #custom-syncthing.syncing,
       #battery.warning:not(.charging) {
         color: #f5a524;
       }
+      #custom-notif.empty,
       #custom-mic.idle,
       #custom-mic.muted,
       #custom-tailscale.up, #custom-syncthing.up,
@@ -207,9 +217,12 @@ in
         color: #5c5c5c;
       }
       #custom-tailscale, #custom-syncthing, #custom-docker, #custom-gdrive,
-      #custom-recording, #custom-dnd, #custom-mic, #backlight,
+      #custom-recording, #custom-notif, #custom-mic, #backlight,
       #pulseaudio, #bluetooth, #network, #battery {
         padding: 0 9px;
+      }
+      #submap {
+        padding-left: 14px;
       }
       #workspaces {
         padding-left: 6px;
