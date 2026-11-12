@@ -8,9 +8,9 @@ let
     # provider-qualified — a bare "meta/muse-spark-1.3" is parsed as provider
     # "meta" and silently falls back to an unrelated default model.
     modelRoles = {
-      default = "openrouter/meta/muse-spark-1.3";
-      slow = "openrouter/meta/muse-wonder";
-      smol = "openrouter/z-ai/glm-5.3";
+#      default = "openrouter/meta/muse-spark-1.3";
+#      slow = "openrouter/meta/muse-wonder";
+#      smol = "openrouter/z-ai/glm-5.3";
     };
   };
   configFile = (pkgs.formats.yaml { }).generate "omp-config.yml" settings;
