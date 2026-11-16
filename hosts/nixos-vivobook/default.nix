@@ -19,6 +19,7 @@
     ../../modules/desktop/gdrive.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/desktop/steam.nix
+    ../../modules/desktop/wivrn.nix
   ];
 
   networking.hostName = "nixos-vivobook";
