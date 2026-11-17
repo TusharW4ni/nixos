@@ -178,8 +178,9 @@ in
           inner_color = "rgba(00000000)";
           font_color = white;
           font_family = "JetBrains Mono";
-          dots_text_format = "*";
-          dots_size = 0.5;
+          dots_text_format = "<b>*</b>";
+          dots_size = 0.35;
+          dots_rounding = 0; # the default rounds the glyph box, softening it
           dots_spacing = 0.3;
           dots_center = true;
           placeholder_text = "";
