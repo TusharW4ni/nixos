@@ -1,0 +1,55 @@
+--- a/src/renderer/widgets/PasswordInputField.cpp	2026-11-16 18:57:48.084813383 -0600
++++ b/src/renderer/widgets/PasswordInputField.cpp	2026-11-16 18:57:48.112200823 -0600
+@@ -14,6 +14,16 @@
+ #include <hyprutils/string/String.hpp>
+ #include <algorithm>
+ #include <hyprlang.hpp>
++#include <chrono>
++
++// Terminal-style caret after the dots: solid on each keystroke, then
++// blinking every 500ms. A 100ms timer keeps frames coming so it can blink.
++static std::chrono::steady_clock::time_point caretLastInput = std::chrono::steady_clock::now();
++
++static void caretTick(ASP<CTimer>, void*) {
++    g_pHyprlock->renderAllOutputs();
++    g_pHyprlock->addTimer(std::chrono::milliseconds(100), caretTick, nullptr);
++}
+ 
+ using namespace Hyprutils::String;
+ 
+@@ -99,6 +109,12 @@
+ 
+     // request the inital placeholder asset
+     updatePlaceholder();
++
++    static bool caretTicking = false;
++    if (!caretTicking) {
++        caretTicking = true;
++        g_pHyprlock->addTimer(std::chrono::milliseconds(100), caretTick, nullptr);
++    }
+ }
+ 
+ void CPasswordInputField::reset() {
+@@ -164,6 +180,8 @@
+     if (dots.currentAmount->goal() == passwordLength)
+         return;
+ 
++    caretLastInput = std::chrono::steady_clock::now();
++
+     if (checkWaiting && configCheckText.empty())
+         return;
+ 
+@@ -298,6 +316,13 @@
+ 
+             fontCol.a = DOTALPHA;
+         }
++
++        const auto caretMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - caretLastInput).count();
++        if (!checkWaiting && !displayFail && caretMs / 500 % 2 == 0) {
++            const double caretX = xstart + std::min<double>(CURRDOTS, MAXDOTS) * (passSize.x + passSpacing);
++            CBox caret{inputFieldBox.pos() + Vector2D{caretX, (inputFieldBox.h - passSize.y) / 2.0}, Vector2D{std::max(2.0, std::round(passSize.x / 6.0)), passSize.y}};
++            g_pRenderer->renderRect(caret, fontCol, 0);
++        }
+     }
+ 
+     bool placeholderPasswordCondition = (passwordLength == 0 && placeholder.resourceID > 0);

@@ -141,10 +141,14 @@ in
     "f %h/.local/state/hypridle/overrides.conf - - - -"
   ];
 
-  # Lock screen: black, the top bar's clock up top, a _ in the middle that
-  # turns into a * per typed character. Enter submits.
+  # Lock screen: black, the top bar's clock up top, and a blinking bar in the
+  # middle with a * per typed character before it. Enter submits.
   programs.hyprlock = {
     enable = true;
+    # hyprlock has no caret; the patch draws one after the dots.
+    package = pkgs.hyprlock.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ../pkgs/hyprlock-caret.patch ];
+    });
     settings =
       let
         white = "rgb(e6e6e6)";
@@ -178,7 +182,7 @@ in
           dots_size = 0.5;
           dots_spacing = 0.3;
           dots_center = true;
-          placeholder_text = "_";
+          placeholder_text = "";
           fail_text = ''<span foreground="##ff8080">$FAIL</span>'';
           fade_on_empty = false;
           halign = "center";
