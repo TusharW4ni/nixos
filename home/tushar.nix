@@ -24,6 +24,10 @@ let
       COMMITTED=1
     fi
 
+    # Prompt for the password now: once nom owns the screen it paints over
+    # sudo's prompt and the switch looks hung.
+    sudo -v
+
     # nom (nix-output-monitor) draws the build as a live dependency tree.
     sudo nixos-rebuild switch --flake "$CONFIG_DIR#nixos-vivobook" \
       --log-format internal-json -v "$@" |& ${pkgs.nix-output-monitor}/bin/nom --json
