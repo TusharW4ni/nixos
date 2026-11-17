@@ -137,6 +137,7 @@ in
     # CLI tools and by the caveman plugin's hooks (which call a bare `node`).
     nodejs_24
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.collie.packages.${pkgs.stdenv.hostPlatform.system}.collie
     # Source-built from pkgs/claude-sync.nix (bump version there to update;
     # `claude-sync update` can't self-update the read-only Nix store).
     (pkgs.callPackage ../pkgs/claude-sync.nix { })

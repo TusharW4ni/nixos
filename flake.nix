@@ -34,6 +34,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     herdr.url = "github:herdrdev/herdr/v0.9.0";
+    # Collie: phone PWA for herdr panes, served over Tailscale. Prebuilt
+    # release binary; update with `nix flake update collie` (no self-update).
+    collie.url = "github:AltanS/collie";
     # Hex local voice dictation. Upstream flake: builds the Rust binary and
     # ships a home-manager module (systemd user service + settings). Wired up
     # via programs.hex in home/tushar.nix.
