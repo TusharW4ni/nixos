@@ -141,42 +141,49 @@ in
     "f %h/.local/state/hypridle/overrides.conf - - - -"
   ];
 
-  # Lock screen: black, the top bar's clock up top, a blinking _ in the
-  # middle. Typing echoes nothing; Enter submits. A label can't see
-  # keystrokes, so the _ just blinks on the wall clock (on/off every 500ms).
+  # Lock screen: black, the top bar's clock up top, a _ in the middle that
+  # turns into a * per typed character. Enter submits.
   programs.hyprlock = {
     enable = true;
     settings =
       let
         white = "rgb(e6e6e6)";
-        cursor = pkgs.writeShellScript "hyprlock-cursor" ''
-          (( ''${EPOCHREALTIME/./} / 500000 % 2 )) && c=000000 || c=e6e6e6
-          echo "<span foreground='#$c'>_</span>"
-        '';
-        text = {
-          monitor = "";
-          font_family = "JetBrains Mono";
-          color = white;
-          halign = "center";
-        };
       in
       {
         general.hide_cursor = true;
         animations.enabled = false;
         background = [{ monitor = ""; color = "rgb(000000)"; }];
-        label = map (l: text // l) [
+        label = [
           # Same as waybar's custom/clock (home/waybar.nix): format, font,
           # tabular digits. font_size is in points: 11pt ~ the bar's 15px.
           {
+            monitor = "";
             text = ''cmd[update:1000] date "+<span font_features='tnum'>%a %m/%d · %H:%M:%S</span>"'';
+            color = white;
             font_family = "Atkinson Hyperlegible Next";
             font_size = 11;
             position = "0, -8";
+            halign = "center";
             valign = "top";
           }
-          { text = "cmd[update:250] ${cursor}"; font_size = 24; valign = "center"; }
-          { text = ''<span foreground="##ff8080">$FAIL</span>''; font_size = 14; position = "0, -48"; valign = "center"; }
         ];
+        input-field = [{
+          monitor = "";
+          size = "600, 40";
+          outline_thickness = 0;
+          inner_color = "rgba(00000000)";
+          font_color = white;
+          font_family = "JetBrains Mono";
+          dots_text_format = "*";
+          dots_size = 0.5;
+          dots_spacing = 0.3;
+          dots_center = true;
+          placeholder_text = "_";
+          fail_text = ''<span foreground="##ff8080">$FAIL</span>'';
+          fade_on_empty = false;
+          halign = "center";
+          valign = "center";
+        }];
       };
   };
 
