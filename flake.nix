@@ -40,6 +40,10 @@
     # Hex local voice dictation. Upstream flake: builds the Rust binary and
     # ships a home-manager module (systemd user service + settings). Wired up
     # via programs.hex in home/tushar.nix.
+    # Second copy of nixos-unstable used only for claude-code (overlay below),
+    # so `ns -u nixpkgs-claude` bumps Claude Code without touching the rest
+    # of the system.
+    nixpkgs-claude.url = "github:NixOS/nixpkgs/nixos-unstable";
     hex = {
       url = "github:anomalyco/hex";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -47,13 +51,22 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }: {
+  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
+  let
+    claudeOverlay = final: prev: {
+      claude-code = (import inputs.nixpkgs-claude {
+        system = prev.stdenv.hostPlatform.system;
+        config.allowUnfree = true;
+      }).claude-code;
+    };
+  in {
     nixosConfigurations.nixos-vivobook = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
       modules = [
         ./hosts/nixos-vivobook/default.nix
         inputs.agenix.nixosModules.default
+        { nixpkgs.overlays = [ claudeOverlay ]; }
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
@@ -71,6 +84,7 @@
       modules = [
         ./hosts/latitude7490/default.nix
         inputs.agenix.nixosModules.default
+        { nixpkgs.overlays = [ claudeOverlay ]; }
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;

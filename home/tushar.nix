@@ -6,11 +6,14 @@ let
 
     cd "$CONFIG_DIR"
 
-    # `nixos-switch --update` bumps all flake inputs before rebuilding. Any
-    # other flags are passed through to nixos-rebuild untouched.
+    # `nixos-switch --update [input...]` bumps the named flake inputs (all of
+    # them when none are named) before rebuilding. Any other flags are passed
+    # through to nixos-rebuild untouched.
     if [ "$1" = "--update" ] || [ "$1" = "-u" ]; then
       shift
-      nix flake update
+      inputs=()
+      while [ $# -gt 0 ] && [ "''${1#-}" = "$1" ]; do inputs+=("$1"); shift; done
+      nix flake update "''${inputs[@]}"
     fi
 
     # Commit BEFORE the sudo rebuild so Nix hashes a CLEAN tree. Rebuilding
