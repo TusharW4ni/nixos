@@ -110,6 +110,7 @@ in
     cmatrix
     unzip
     timg
+    ffmpeg
     # C/C++ toolchain: clang (also provides cc/c++) plus clangd,
     # clang-format and clang-tidy from clang-tools.
     clang
