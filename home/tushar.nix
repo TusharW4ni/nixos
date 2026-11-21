@@ -239,16 +239,6 @@ in
     ava-cw = "cd ~/w/app.avagolf.com && cw";
   };
 
-  programs.bash.shellFunctions = {
-    n = ''
-      if [ $# -eq 0]; then
-        nvim .
-      else 
-        nvim "$@"
-      fi
-    '';
-  };
-
   # claude-sync integration: keep sessions synced with the R2 remote.
   # The config.yaml + age-key.txt are delivered by agenix (see
   # modules/system/secrets.nix); this only decides WHEN to push/pull.
@@ -270,6 +260,17 @@ in
     esac
 
     # TODO(human): decide the auto-sync trigger and fill this in.
+
+    # n -> nvim . with no argument, nvim <args> otherwise (aliases can't
+    # branch on $#, so this is a function). Definition doesn't need `nvim`
+    # on PATH — it's resolved at call time.
+    n() {
+      if [ "$#" -eq 0 ]; then
+        nvim .
+      else
+        nvim "$@"
+      fi
+    }
   '';
 
   # Auto-enter a project's dev shell on cd (reads .envrc → `use flake`).
