@@ -78,8 +78,7 @@ in
     ./omp.nix
     inputs.hex.homeManagerModules.default
     inputs.nixvim.homeModules.nixvim
-    # nixvim config sourced from the nvim repo's nixvim branch (see flake input)
-    "${inputs.nvim-config}/nvim.nix"
+    ./nvim.nix
   ];
 
   home.username = "tushar";
@@ -151,69 +150,6 @@ in
     # API keys live in ~/.pi/agent (run `pi`, then /login), outside the store.
     pi-coding-agent
   ];
-
-  # treechat.nvim: tree-shaped LLM chats on top of pi. Loaded from the local
-  # dev checkout so edits apply on nvim restart without a rebuild; skipped
-  # when the checkout isn't there.
-  # Renders markdown (code blocks, headings, bullets, tables) in the treechat
-  # transcript only; its buffer uses filetype "treechat", so regular .md files
-  # are unaffected.
-  programs.nixvim.plugins.render-markdown = {
-    enable = true;
-    settings = {
-      file_types = [ "treechat" ];
-      # Groups defined by treechat: faint block shade, no inline-code background.
-      code = {
-        highlight = "TreechatCode";
-        highlight_inline = "TreechatCodeInline";
-      };
-    };
-  };
-  # Route vim.ui.select (treechat's chat/model/thinking pickers, LSP code
-  # actions, ...) through telescope instead of the cmdline list.
-  programs.nixvim.plugins.telescope.extensions.ui-select.enable = true;
-  # Esc clears search highlights (native :nohlsearch). No-op in normal mode
-  # otherwise, so it's free real estate. Merges with the keymaps list from
-  # the imported nvim-config module above.
-  programs.nixvim.keymaps = [
-    {
-      mode = "n";
-      key = "<Esc>";
-      action = "<cmd>nohlsearch<CR>";
-      options.desc = "Clear search highlight";
-    }
-  ]
-  # C-h/j/k/l window navigation in normal + terminal mode. Normal mode uses
-  # the native <C-w> prefix; terminal mode needs <C-\><C-n> to escape first.
-  ++ (map
-    (dir: {
-      mode = "n";
-      key = "<C-${dir}>";
-      action = "<C-w>${dir}";
-      options.desc = "Window ${dir}";
-    })
-    [ "h" "j" "k" "l" ]
-  )
-  ++ (map
-    (dir: {
-      mode = "t";
-      key = "<C-${dir}>";
-      action = "<C-\\><C-n><C-w>${dir}";
-      options.desc = "Window ${dir}";
-    })
-    [ "h" "j" "k" "l" ]
-  )
-  ;
-  # copilot-vim is enabled by the imported nvim-config module; disable it
-  # here. Its <Plug> keymaps (also from that module) become inert no-ops.
-  programs.nixvim.plugins.copilot-vim.enable = lib.mkForce false;
-  programs.nixvim.extraConfigLua = ''
-    local treechat_dir = vim.fn.expand("~/p/treechat.nvim")
-    if vim.fn.isdirectory(treechat_dir) == 1 then
-      vim.opt.rtp:prepend(treechat_dir)
-      require("treechat").setup({})
-    end
-  '';
 
   xdg.configFile."herdr/config.toml".source = ./herdr.toml;
 

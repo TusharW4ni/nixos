@@ -20,13 +20,6 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Neovim config lives in the nvim repo's nixvim branch (main stays the
-    # lazy.nvim/Mason config). flake=false: it's just a module file we import.
-    # `nix flake update nvim-config` pulls the latest branch commit.
-    nvim-config = {
-      url = "github:TusharW4ni/nvim/nixvim";
-      flake = false;
-    };
     # Live systemd-job tree on the boot/shutdown console. Module enabled in
     # modules/system/boot.nix.
     bootvine = {
