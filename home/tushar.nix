@@ -237,7 +237,16 @@ in
     "...." = "cd ../../..";
     ava = "cd ~/w/app.avagolf.com";
     ava-cw = "cd ~/w/app.avagolf.com && cw";
-    n = "nvim";
+  };
+
+  programs.bash.shellFunctions = {
+    n = ''
+      if [ $# -eq 0]; then
+        nvim .
+      else 
+        nvim "$@"
+      fi
+    '';
   };
 
   # claude-sync integration: keep sessions synced with the R2 remote.
