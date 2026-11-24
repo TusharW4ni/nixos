@@ -349,6 +349,8 @@ local held = { locked = true, repeating = true }
 bind("XF86AudioRaiseVolume", run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), "Volume up", held)
 bind("XF86AudioLowerVolume", run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), "Volume down", held)
 bind("XF86AudioMute", run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), "Mute", { locked = true })
+-- The dock's headphone jack can't report unplugs, so switching is manual.
+bind(mod .. " + A", run("audio-out"), "Next audio output (dock / speakers / Bluetooth)", { locked = true })
 bind("XF86MonBrightnessUp", run("brightnessctl set 5%+"), "Brightness up", held)
 bind("XF86MonBrightnessDown", run("brightnessctl set 5%-"), "Brightness down", held)
 

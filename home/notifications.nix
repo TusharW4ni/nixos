@@ -10,9 +10,10 @@ let
   dnd = script "dnd" ([ notif ] ++ (with pkgs; [ jq pulseaudio gnugrep ]));
   shot = script "shot" (with pkgs; [ grim slurp wl-clipboard jq libnotify satty util-linux coreutils ]);
   media = script "media" (with pkgs; [ playerctl libnotify coreutils ]);
+  audio-out = script "audio-out" (with pkgs; [ pipewire wireplumber jq libnotify gnused coreutils ]);
 in
 {
-  home.packages = [ notif dnd shot media pkgs.libnotify pkgs.playerctl ];
+  home.packages = [ notif dnd shot media audio-out pkgs.libnotify pkgs.playerctl ];
 
   # Banners, the pane and the notification server: ./quickshell/shell.qml.
   programs.quickshell = {
