@@ -224,6 +224,8 @@ in
   # guard could fail and the aliases silently vanish.
   #   c  -> claude (auto mode)
   #   cw -> claude in a fresh git worktree (auto mode; accepts an optional name)
+  #   n  -> nvim . with no argument, nvim <args> otherwise
+  #   ghe -> gh issue view
   #   o  -> omp (see ./omp.nix)
   #   ponder -> headless ponder-skill loop: ponder [repo] [sleep-seconds]
   programs.bash.shellAliases = {
@@ -270,6 +272,14 @@ in
       else
         nvim "$@"
       fi
+    }
+
+    # ghe -> view a GitHub issue in a readonly nvim buffer (gh issue view
+    # prints markdown; `gh issue view 42 --comments` also works).
+    # NB: the `-` (read stdin) must come BEFORE the -c commands, otherwise
+    # nvim opens an empty buffer (verified with --headless, 2026-06).
+    ghe() {
+      gh issue view "$@" | nvim -R - -c 'set ft=markdown buftype=nofile'
     }
   '';
 
