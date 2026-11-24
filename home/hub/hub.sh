@@ -121,6 +121,30 @@ nightlight() {
   done
 }
 
+# -------------------------------------------------------------------- audio
+# Pick the default output (* marks it; playing streams follow it) or open the
+# mixer. Manual because the Dell D6000 dock's headphone jack sensor always
+# reads "plugged in", so nothing can switch outputs on its own.
+audio() {
+  local c cur sinks id desc items
+  while :; do
+    sinks=$(pw-dump | jq -r '.[] | select(.info.props["media.class"]? == "Audio/Sink")
+      | "\(.id)\t\(.info.props["node.description"] // .info.props["node.name"])"' | sort -n)
+    cur=$(wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | sed -n '1s/^id \([0-9]*\),.*/\1/p')
+    items=()
+    while IFS=$'\t' read -r id desc; do
+      [[ $id == "$cur" ]] && items+=("* $desc") || items+=("  $desc")
+    done <<<"$sinks"
+    c=$(pick "audio output" "${items[@]}" "" "mixer") || return
+    case $c in
+      mixer) wiremix ;;
+      "") ;;
+      *) id=$(awk -F'\t' -v d="${c#\* }" '$2 == d { print $1; exit }' <<<"$sinks")
+         [[ -n $id ]] && wpctl set-default "$id" ;;
+    esac
+  done
+}
+
 # -------------------------------------------------------------------- power
 power() {
   local k i
@@ -330,7 +354,7 @@ run() {
   case $1 in
     wifi) wifitui ;;
     bluetooth) bluetui ;;
-    audio) wiremix ;;
+    audio) audio ;;
     displays) hyprmon ;;
     autolock) autolock ;;
     nightlight) nightlight ;;

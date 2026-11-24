@@ -44,7 +44,7 @@ let
     bashOptions = [ "nounset" "pipefail" ]; # no errexit: Esc in a submenu must not close the hub
     runtimeInputs = with pkgs; [
       gum fzf jq gnused coreutils util-linux brightnessctl
-      wifitui bluetui wiremix systemd-manager-tui hyprmon
+      wifitui bluetui wiremix systemd-manager-tui hyprmon pipewire wireplumber
       curl tailscale lazydocker wl-clipboard procps ncurses
       gdu duf smartmontools udisks
     ];
@@ -101,7 +101,7 @@ in
   vicinaeScripts = {
     hub-wifi = section "wifi" "Wi-Fi";
     hub-bluetooth = section "bluetooth" "Bluetooth";
-    hub-audio = section "audio" "Audio Mixer";
+    hub-audio = section "audio" "Audio Output and Mixer";
     hub-displays = section "displays" "Displays";
     hub-autolock = section "autolock" "Auto-lock Settings";
     hub-nightlight = section "nightlight" "Night Light";
