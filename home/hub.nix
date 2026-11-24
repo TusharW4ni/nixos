@@ -11,10 +11,31 @@ let
   # adding a require() to that config. The real hyprland.lua is a read-only
   # Nix symlink, so give it a writable stub in ~/.local/state/hyprmon; the
   # layout lands in ~/.local/state/hyprmon/hyprmon.lua, which hypr/main.lua loads.
+  #
+  # hyprmon (0.0.17) applies live changes with `hyprctl keyword monitor ...`,
+  # which a Lua-config Hyprland rejects ("keyword can't work with non-legacy
+  # parsers"). This hyprctl, first on hyprmon's PATH, turns those calls into
+  # `hyprctl eval 'hl.monitor({...})'` and passes everything else through.
+  hyprctlLua = pkgs.writeShellScriptBin "hyprctl" ''
+    real=/run/current-system/sw/bin/hyprctl
+    if [ "''${1:-}" = keyword ] && [ "''${2:-}" = monitor ]; then
+      # NAME,disable | NAME,WxH@R,XxY,SCALE[,mirror,SRC]
+      IFS=, read -r out mode pos scale flag src <<<"$3"
+      if [ "$mode" = disable ]; then
+        lua="output = \"$out\", disabled = true"
+      else
+        lua="output = \"$out\", mode = \"$mode\", position = \"$pos\", scale = $scale"
+        [ "$flag" = mirror ] && lua="$lua, mirror = \"$src\""
+      fi
+      exec "$real" eval "hl.monitor({ $lua })"
+    fi
+    exec "$real" "$@"
+  '';
   hyprmon = pkgs.writeShellScriptBin "hyprmon" ''
     dir=''${XDG_STATE_HOME:-$HOME/.local/state}/hyprmon
     mkdir -p "$dir"
     export HYPRLAND_CONFIG=$dir/hyprland.lua
+    export PATH=${hyprctlLua}/bin:$PATH
     exec ${pkgs.hyprmon}/bin/hyprmon "$@"
   '';
 
