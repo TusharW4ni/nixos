@@ -20,6 +20,7 @@
     ../../modules/desktop/hyprland.nix
     ../../modules/desktop/steam.nix
     ../../modules/desktop/wivrn.nix
+    ../../modules/desktop/displaylink.nix
   ];
 
   networking.hostName = "nixos-vivobook";
