@@ -13,4 +13,11 @@
     JobRetryInterval 60
     JobRetryLimit 30
   '';
+
+  # Scanning: the Epson WF-2530 works with SANE's stock epson2 backend over
+  # the network (Epson net protocol, port 1865), no unfree epkowa needed.
+  # ponytail: hardcoded DHCP address; if the printer's IP changes, update it
+  # here or give it a DHCP reservation on the router.
+  hardware.sane.enable = true;
+  hardware.sane.extraConfig.epson2 = "net 192.168.1.73";
 }
