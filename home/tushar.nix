@@ -61,6 +61,18 @@ let
     google-chrome-stable --new-window "$URL" >/dev/null 2>&1 &
     wait
   '';
+  # `scan [path/name]` scans one page from the Epson WF-2530 (see
+  # modules/system/printing.nix) to a PNG. A bare name lands in the current
+  # directory; .png is appended if missing; no argument = timestamped name.
+  scan = pkgs.writeShellScriptBin "scan" ''
+    set -e
+    out="''${1:-scan-$(date +%Y%m%d-%H%M%S)}"
+    case "$out" in *.png) ;; *) out="$out.png" ;; esac
+    mkdir -p "$(dirname "$out")"
+    scanimage -d epson2:net:192.168.1.73 --mode Color --resolution 300 \
+      --format=png -o "$out"
+    echo "$out"
+  '';
   # Every Claude Code session gets its own systemd scope in claude.slice
   # (below). The slice's low CPU weight keeps the desktop responsive when
   # sessions max out the CPU, and under memory pressure systemd-oomd kills
@@ -98,6 +110,8 @@ in
     nixos-switch
     nix-output-monitor # `nom build`, `nom develop`, `nom shell` for ad-hoc builds
     devices
+    scan
+    img2pdf # lossless PNG/JPEG -> PDF: img2pdf *.png -o out.pdf
     # Playwright CLI wired to nixpkgs' own browsers (incl. WebKit); the
     # browsers Playwright downloads itself don't run on NixOS.
     playwright-test
