@@ -21,6 +21,8 @@
   hardware.sane.enable = true;
   # No per-backend config option exists; a later extraBackends path overrides
   # the stock epson2.conf symlink. Bare "usb" keeps USB autodetection.
+  # v4l exposes webcams as scanners; scanimage without -d grabbed the camera.
+  hardware.sane.disabledDefaultBackends = [ "v4l" ];
   hardware.sane.extraBackends = [
     (pkgs.writeTextDir "etc/sane.d/epson2.conf" ''
       usb
