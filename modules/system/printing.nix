@@ -19,5 +19,12 @@
   # ponytail: hardcoded DHCP address; if the printer's IP changes, update it
   # here or give it a DHCP reservation on the router.
   hardware.sane.enable = true;
-  hardware.sane.extraConfig.epson2 = "net 192.168.1.73";
+  # No per-backend config option exists; a later extraBackends path overrides
+  # the stock epson2.conf symlink. Bare "usb" keeps USB autodetection.
+  hardware.sane.extraBackends = [
+    (pkgs.writeTextDir "etc/sane.d/epson2.conf" ''
+      usb
+      net 192.168.1.73
+    '')
+  ];
 }
