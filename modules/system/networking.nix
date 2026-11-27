@@ -6,5 +6,12 @@
     extraSetFlags = [ "--operator=tushar" ]; # tailscale up/down without sudo (bar + hub)
   };
 
-  networking.firewall.allowedTCPPortRanges = [ { from = 3000; to = 3100; } ];
+  networking.firewall = {
+    allowedTCPPortRanges = [ 
+      { from = 27036; to = 27037; } 
+    ];
+    allowedUDPPortRanges = [
+      { from = 27031; to = 27036; }
+    ];
+  };
 }
